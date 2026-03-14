@@ -1,0 +1,1135 @@
+--[[
+    Drk Baedi | Blade Ball
+    Game ID: 13772394625
+    Discord: discord.gg/kAXF2VFCU
+--]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local Camera = workspace.CurrentCamera
+local IsMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+
+local StopFly = nil
+local EnableAllESP = nil
+local DisableAllESP = nil
+local UpdateESPInfo = nil
+local ResetHitboxes = nil
+local EnableFullbright = nil
+local DisableFullbright = nil
+
+local Config = {
+    AutoParry = false,
+    ParryDistance = 35,
+    ParryTiming = 0.45,
+    SmartParry = false,
+    AutoSpam = false,
+    SpamDelay = 0.08,
+    HitboxExpander = false,
+    HitboxSize = 15,
+    AutoDodge = false,
+    DodgeDistance = 12,
+    SpeedEnabled = false,
+    SpeedValue = 28,
+    JumpEnabled = false,
+    JumpValue = 70,
+    FlyEnabled = false,
+    FlySpeed = 65,
+    NoclipEnabled = false,
+    InfiniteJump = false,
+    AntiFling = false,
+    AntiSlow = false,
+    ESPEnabled = false,
+    BallESP = false,
+    Fullbright = false,
+    FOVEnabled = false,
+    FOVValue = 90,
+    NoParticles = false,
+    TeleportTarget = "",
+    AutoEquip = false,
+}
+
+local Connections = {}
+local ESPCache = {}
+local OrigHitboxes = {}
+local FlyActive = false
+local FlyBV = nil
+local FlyBG = nil
+local ParryDebounce = false
+local DodgeDebounce = false
+local lastSpamTick = 0
+local OriginalFOV = Camera.FieldOfView
+local OriginalAmbient = Lighting.Ambient
+local OriginalBrightness = Lighting.Brightness
+local BallHighlight = nil
+local BallBillboard = nil
+local ParryRemote = nil
+
+--------------------------------------------------------------------
+--                      UTILITIES                                 --
+--------------------------------------------------------------------
+
+local function GetCharacter()
+    return LocalPlayer.Character
+end
+
+local function GetHumanoid()
+    local c = GetCharacter()
+    if c then return c:FindFirstChildOfClass("Humanoid") end
+    return nil
+end
+
+local function GetRootPart()
+    local c = GetCharacter()
+    if c then return c:FindFirstChild("HumanoidRootPart") end
+    return nil
+end
+
+local function IsAlive()
+    local h = GetHumanoid()
+    if h and h.Health > 0 then return true end
+    return false
+end
+
+local function GetNearestPlayer(maxDist)
+    local root = GetRootPart()
+    if not root then return nil, math.huge end
+    local best = nil
+    local bestDist = maxDist or math.huge
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local r = p.Character:FindFirstChild("HumanoidRootPart")
+            local h = p.Character:FindFirstChildOfClass("Humanoid")
+            if r and h and h.Health > 0 then
+                local d = (root.Position - r.Position).Magnitude
+                if d < bestDist then
+                    best = p
+                    bestDist = d
+                end
+            end
+        end
+    end
+    return best, bestDist
+end
+
+local function FindPlayerByName(name)
+    name = name:lower()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            if p.Name:lower():find(name) or p.DisplayName:lower():find(name) then
+                return p
+            end
+        end
+    end
+    return nil
+end
+
+local function SimulateClick()
+    pcall(function()
+        local VIM = game:GetService("VirtualInputManager")
+        VIM:SendMouseButtonEvent(Mouse.X, Mouse.Y, 0, true, game, 0)
+        task.delay(0.03, function()
+            pcall(function()
+                VIM:SendMouseButtonEvent(Mouse.X, Mouse.Y, 0, false, game, 0)
+            end)
+        end)
+    end)
+end
+
+local function SimulateKey(keyCode, duration)
+    duration = duration or 0.08
+    pcall(function()
+        local VIM = game:GetService("VirtualInputManager")
+        VIM:SendKeyEvent(true, keyCode, false, game)
+        task.delay(duration, function()
+            pcall(function()
+                VIM:SendKeyEvent(false, keyCode, false, game)
+            end)
+        end)
+    end)
+end
+
+--------------------------------------------------------------------
+--                    BALL DETECTION                              --
+--------------------------------------------------------------------
+
+local function FindBall()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            local n = obj.Name:lower()
+            if n == "ball" or n == "bladeball" or n == "blade" then
+                return obj
+            end
+        end
+    end
+    for _, folder in ipairs(workspace:GetChildren()) do
+        if folder:IsA("Folder") or folder:IsA("Model") then
+            local fn = folder.Name:lower()
+            if fn:find("ball") or fn:find("blade") or fn:find("projectile") then
+                for _, child in ipairs(folder:GetDescendants()) do
+                    if child:IsA("BasePart") then
+                        return child
+                    end
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function GetBallSpeed(ball)
+    if not ball or not ball.Parent then return 0 end
+    return ball.AssemblyLinearVelocity.Magnitude
+end
+
+local function IsBallComingToMe(ball)
+    if not ball or not ball.Parent then return false end
+    local myRoot = GetRootPart()
+    if not myRoot then return false end
+    local dist = (ball.Position - myRoot.Position).Magnitude
+    if dist > Config.ParryDistance then return false end
+    local ballVel = ball.AssemblyLinearVelocity
+    if ballVel.Magnitude < 5 then return false end
+    local toMe = (myRoot.Position - ball.Position).Unit
+    local ballDir = ballVel.Unit
+    local dot = toMe:Dot(ballDir)
+    if dot > 0.3 then return true end
+    return false
+end
+
+local function GetBallETA(ball)
+    if not ball or not ball.Parent then return math.huge end
+    local myRoot = GetRootPart()
+    if not myRoot then return math.huge end
+    local dist = (ball.Position - myRoot.Position).Magnitude
+    local speed = ball.AssemblyLinearVelocity.Magnitude
+    if speed < 1 then return math.huge end
+    return dist / speed
+end
+
+local function GetBallDistToMe(ball)
+    if not ball or not ball.Parent then return math.huge end
+    local myRoot = GetRootPart()
+    if not myRoot then return math.huge end
+    return (ball.Position - myRoot.Position).Magnitude
+end
+
+--------------------------------------------------------------------
+--                    REMOTE FINDER                               --
+--------------------------------------------------------------------
+
+local function FindParryRemote()
+    local function Search(parent)
+        if not parent then return end
+        pcall(function()
+            for _, child in ipairs(parent:GetDescendants()) do
+                if child:IsA("RemoteEvent") then
+                    local n = child.Name:lower()
+                    if n:find("parry") or n:find("deflect") or n:find("block") or n:find("hit") or n:find("swing") or n:find("click") then
+                        if not ParryRemote then
+                            ParryRemote = child
+                        end
+                    end
+                end
+            end
+        end)
+    end
+    Search(ReplicatedStorage)
+    pcall(function() Search(LocalPlayer.PlayerScripts) end)
+    pcall(function()
+        local char = GetCharacter()
+        if char then
+            for _, tool in ipairs(char:GetChildren()) do
+                if tool:IsA("Tool") then Search(tool) end
+            end
+        end
+        local bp = LocalPlayer:FindFirstChild("Backpack")
+        if bp then
+            for _, tool in ipairs(bp:GetChildren()) do
+                if tool:IsA("Tool") then Search(tool) end
+            end
+        end
+    end)
+end
+
+task.spawn(function()
+    task.wait(3)
+    FindParryRemote()
+end)
+
+--------------------------------------------------------------------
+--                    COMBAT FEATURES                             --
+--------------------------------------------------------------------
+
+local function FireParry()
+    if ParryRemote then
+        pcall(function() ParryRemote:FireServer() end)
+    end
+    SimulateClick()
+    pcall(function()
+        local char = GetCharacter()
+        if char then
+            for _, tool in ipairs(char:GetChildren()) do
+                if tool:IsA("Tool") then tool:Activate() end
+            end
+        end
+    end)
+end
+
+local function RunAutoParry()
+    if ParryDebounce or not IsAlive() then return end
+    local ball = FindBall()
+    if not ball then return end
+    if IsBallComingToMe(ball) then
+        local eta = GetBallETA(ball)
+        if eta < Config.ParryTiming then
+            ParryDebounce = true
+            FireParry()
+            task.delay(0.4, function() ParryDebounce = false end)
+        end
+    end
+end
+
+local function RunSmartParry()
+    if ParryDebounce or not IsAlive() then return end
+    local ball = FindBall()
+    if not ball then return end
+    if not IsBallComingToMe(ball) then return end
+
+    local dist = GetBallDistToMe(ball)
+    local speed = GetBallSpeed(ball)
+    local eta = GetBallETA(ball)
+
+    -- Dynamic timing based on ball speed
+    local dynamicTiming = Config.ParryTiming
+    if speed > 150 then
+        dynamicTiming = dynamicTiming * 0.6
+    elseif speed > 100 then
+        dynamicTiming = dynamicTiming * 0.8
+    end
+
+    -- Also check raw distance as fallback
+    local distThreshold = math.max(8, speed * 0.06)
+
+    if eta < dynamicTiming or dist < distThreshold then
+        ParryDebounce = true
+        FireParry()
+        task.delay(0.35, function() ParryDebounce = false end)
+    end
+end
+
+local function RunAutoDodge()
+    if DodgeDebounce or not IsAlive() then return end
+    local ball = FindBall()
+    if not ball then return end
+
+    local myRoot = GetRootPart()
+    if not myRoot then return end
+
+    local dist = GetBallDistToMe(ball)
+    if dist > Config.DodgeDistance then return end
+
+    if IsBallComingToMe(ball) then
+        DodgeDebounce = true
+
+        -- Move perpendicular to ball direction
+        local ballDir = ball.AssemblyLinearVelocity.Unit
+        local right = Vector3.new(-ballDir.Z, 0, ballDir.X)
+
+        -- Pick random side
+        if math.random() > 0.5 then
+            right = -right
+        end
+
+        pcall(function()
+            myRoot.CFrame = myRoot.CFrame + (right * 8)
+        end)
+
+        task.delay(0.5, function() DodgeDebounce = false end)
+    end
+end
+
+local function RunAutoSpam()
+    if not IsAlive() then return end
+    local now = tick()
+    if now - lastSpamTick < Config.SpamDelay then return end
+    lastSpamTick = now
+    SimulateClick()
+    pcall(function()
+        local char = GetCharacter()
+        if char then
+            for _, tool in ipairs(char:GetChildren()) do
+                if tool:IsA("Tool") then tool:Activate() end
+            end
+        end
+    end)
+end
+
+local function ExpandHitboxes()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                if not OrigHitboxes[p] then OrigHitboxes[p] = hrp.Size end
+                pcall(function()
+                    hrp.Size = Vector3.new(Config.HitboxSize, Config.HitboxSize, Config.HitboxSize)
+                    hrp.Transparency = 0.7
+                    hrp.CanCollide = false
+                    hrp.Material = Enum.Material.ForceField
+                end)
+            end
+        end
+    end
+end
+
+ResetHitboxes = function()
+    for p, size in pairs(OrigHitboxes) do
+        pcall(function()
+            if p.Character then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.Size = size
+                    hrp.Transparency = 1
+                    hrp.Material = Enum.Material.SmoothPlastic
+                end
+            end
+        end)
+    end
+    OrigHitboxes = {}
+end
+
+local function RunAutoEquip()
+    pcall(function()
+        local bp = LocalPlayer:FindFirstChild("Backpack")
+        if bp then
+            for _, tool in ipairs(bp:GetChildren()) do
+                if tool:IsA("Tool") then
+                    local hum = GetHumanoid()
+                    if hum then
+                        hum:EquipTool(tool)
+                        return
+                    end
+                end
+            end
+        end
+    end)
+end
+
+--------------------------------------------------------------------
+--                  MOVEMENT FEATURES                            --
+--------------------------------------------------------------------
+
+local function StartFly()
+    local hrp = GetRootPart()
+    local hum = GetHumanoid()
+    if not hrp or not hum then return end
+    FlyActive = true
+    hum.PlatformStand = true
+    FlyBV = Instance.new("BodyVelocity")
+    FlyBV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    FlyBV.Velocity = Vector3.new(0, 0, 0)
+    FlyBV.Parent = hrp
+    FlyBG = Instance.new("BodyGyro")
+    FlyBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    FlyBG.P = 9e4
+    FlyBG.Parent = hrp
+    Connections.FlyLoop = RunService.Heartbeat:Connect(function()
+        if not FlyActive or not hrp or not hrp.Parent then StopFly() return end
+        local dir = Vector3.new(0, 0, 0)
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + Camera.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - Camera.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir = dir - Camera.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir = dir + Camera.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
+        FlyBV.Velocity = dir * Config.FlySpeed
+        FlyBG.CFrame = Camera.CFrame
+    end)
+end
+
+StopFly = function()
+    FlyActive = false
+    if FlyBV then FlyBV:Destroy() FlyBV = nil end
+    if FlyBG then FlyBG:Destroy() FlyBG = nil end
+    if Connections.FlyLoop then Connections.FlyLoop:Disconnect() Connections.FlyLoop = nil end
+    pcall(function() local hum = GetHumanoid() if hum then hum.PlatformStand = false end end)
+end
+
+local function RunNoclip()
+    local char = GetCharacter()
+    if not char then return end
+    for _, part in ipairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then part.CanCollide = false end
+    end
+end
+
+local function SetupInfiniteJump()
+    if Connections.InfJump then return end
+    Connections.InfJump = UserInputService.JumpRequest:Connect(function()
+        if Config.InfiniteJump and IsAlive() then
+            pcall(function() GetHumanoid():ChangeState(Enum.HumanoidStateType.Jumping) end)
+        end
+    end)
+end
+
+local function RunAntiFling()
+    local hrp = GetRootPart()
+    if hrp and hrp.AssemblyLinearVelocity.Magnitude > 100 then
+        hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+    end
+end
+
+local function RunAntiSlow()
+    local hum = GetHumanoid()
+    if not hum then return end
+    if hum.WalkSpeed < 16 and not Config.SpeedEnabled then
+        pcall(function() hum.WalkSpeed = 16 end)
+    end
+end
+
+--------------------------------------------------------------------
+--                   ESP FEATURES                                --
+--------------------------------------------------------------------
+
+local function CreateESP(player)
+    if player == LocalPlayer or ESPCache[player] then return end
+    local hl = Instance.new("Highlight")
+    hl.Name = "DrkBaediESP"
+    hl.FillTransparency = 0.6
+    hl.OutlineTransparency = 0
+    hl.OutlineColor = Color3.fromRGB(200, 50, 50)
+    hl.FillColor = Color3.fromRGB(150, 30, 30)
+
+    local bb = Instance.new("BillboardGui")
+    bb.Name = "DrkInfo"
+    bb.Size = UDim2.fromOffset(200, 50)
+    bb.StudsOffset = Vector3.new(0, 3.5, 0)
+    bb.AlwaysOnTop = true
+    bb.LightInfluence = 0
+
+    local nl = Instance.new("TextLabel")
+    nl.Size = UDim2.new(1, 0, 0.5, 0)
+    nl.BackgroundTransparency = 1
+    nl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nl.TextStrokeTransparency = 0.3
+    nl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    nl.Font = Enum.Font.GothamBold
+    nl.TextSize = 13
+    nl.Text = player.DisplayName
+    nl.Parent = bb
+
+    local il = Instance.new("TextLabel")
+    il.Size = UDim2.new(1, 0, 0.5, 0)
+    il.Position = UDim2.new(0, 0, 0.5, 0)
+    il.BackgroundTransparency = 1
+    il.TextColor3 = Color3.fromRGB(0, 255, 100)
+    il.TextStrokeTransparency = 0.3
+    il.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    il.Font = Enum.Font.GothamBold
+    il.TextSize = 11
+    il.Text = "..."
+    il.Parent = bb
+
+    ESPCache[player] = { Highlight = hl, Billboard = bb, NameLabel = nl, InfoLabel = il }
+
+    local function Attach()
+        pcall(function()
+            if player.Character then
+                hl.Adornee = player.Character
+                hl.Parent = player.Character
+                local head = player.Character:FindFirstChild("Head")
+                if head then bb.Adornee = head bb.Parent = head end
+            end
+        end)
+    end
+    Attach()
+    Connections["ESP_" .. player.UserId] = player.CharacterAdded:Connect(function()
+        task.wait(1)
+        if Config.ESPEnabled then Attach() end
+    end)
+end
+
+local function RemoveESP(player)
+    local c = ESPCache[player]
+    if c then
+        pcall(function() c.Highlight:Destroy() end)
+        pcall(function() c.Billboard:Destroy() end)
+        ESPCache[player] = nil
+    end
+    local k = "ESP_" .. player.UserId
+    if Connections[k] then Connections[k]:Disconnect() Connections[k] = nil end
+end
+
+EnableAllESP = function()
+    for _, p in ipairs(Players:GetPlayers()) do CreateESP(p) end
+    Connections.ESPJoin = Players.PlayerAdded:Connect(function(p)
+        if Config.ESPEnabled then CreateESP(p) end
+    end)
+    Connections.ESPLeave = Players.PlayerRemoving:Connect(function(p) RemoveESP(p) end)
+end
+
+DisableAllESP = function()
+    for p in pairs(ESPCache) do RemoveESP(p) end
+    if Connections.ESPJoin then Connections.ESPJoin:Disconnect() Connections.ESPJoin = nil end
+    if Connections.ESPLeave then Connections.ESPLeave:Disconnect() Connections.ESPLeave = nil end
+end
+
+UpdateESPInfo = function()
+    local myRoot = GetRootPart()
+    for player, data in pairs(ESPCache) do
+        pcall(function()
+            if player.Character then
+                local hum = player.Character:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    local pct = hum.Health / hum.MaxHealth
+                    local col
+                    if pct > 0.6 then col = Color3.fromRGB(0, 255, 80)
+                    elseif pct > 0.3 then col = Color3.fromRGB(255, 200, 0)
+                    else col = Color3.fromRGB(255, 50, 50) end
+                    local distTxt = ""
+                    if myRoot then
+                        local er = player.Character:FindFirstChild("HumanoidRootPart")
+                        if er then distTxt = " | " .. math.floor((myRoot.Position - er.Position).Magnitude) .. "m" end
+                    end
+                    data.InfoLabel.Text = string.format("HP: %d/%d%s", math.floor(hum.Health), math.floor(hum.MaxHealth), distTxt)
+                    data.InfoLabel.TextColor3 = col
+                    data.Highlight.FillColor = col
+                end
+            end
+        end)
+    end
+end
+
+-- Ball ESP
+local function EnableBallESP()
+    if BallHighlight then return end
+    BallHighlight = Instance.new("Highlight")
+    BallHighlight.Name = "DrkBallESP"
+    BallHighlight.FillTransparency = 0.3
+    BallHighlight.OutlineTransparency = 0
+    BallHighlight.FillColor = Color3.fromRGB(255, 50, 50)
+    BallHighlight.OutlineColor = Color3.fromRGB(255, 255, 0)
+
+    BallBillboard = Instance.new("BillboardGui")
+    BallBillboard.Name = "DrkBallInfo"
+    BallBillboard.Size = UDim2.fromOffset(150, 30)
+    BallBillboard.StudsOffset = Vector3.new(0, 3, 0)
+    BallBillboard.AlwaysOnTop = true
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(255, 255, 0)
+    label.TextStrokeTransparency = 0.3
+    label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    label.Font = Enum.Font.GothamBlack
+    label.TextSize = 14
+    label.Text = "BALL"
+    label.Parent = BallBillboard
+end
+
+local function DisableBallESP()
+    if BallHighlight then BallHighlight:Destroy() BallHighlight = nil end
+    if BallBillboard then BallBillboard:Destroy() BallBillboard = nil end
+end
+
+local function UpdateBallESP()
+    if not Config.BallESP then return end
+    local ball = FindBall()
+    if ball and BallHighlight then
+        pcall(function()
+            BallHighlight.Adornee = ball
+            BallHighlight.Parent = ball
+            BallBillboard.Adornee = ball
+            BallBillboard.Parent = ball
+
+            local myRoot = GetRootPart()
+            if myRoot then
+                local dist = math.floor((ball.Position - myRoot.Position).Magnitude)
+                local speed = math.floor(GetBallSpeed(ball))
+                local targeting = IsBallComingToMe(ball)
+                local label = BallBillboard:FindFirstChildOfClass("TextLabel")
+                if label then
+                    label.Text = "BALL | " .. dist .. "m | " .. speed .. " spd"
+                    if targeting then
+                        label.TextColor3 = Color3.fromRGB(255, 50, 50)
+                        BallHighlight.FillColor = Color3.fromRGB(255, 0, 0)
+                    else
+                        label.TextColor3 = Color3.fromRGB(255, 255, 0)
+                        BallHighlight.FillColor = Color3.fromRGB(255, 200, 0)
+                    end
+                end
+            end
+        end)
+    end
+end
+
+EnableFullbright = function()
+    pcall(function()
+        Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+        Lighting.Brightness = 2
+        Lighting.FogEnd = 1e6
+        Lighting.GlobalShadows = false
+        for _, v in ipairs(Lighting:GetDescendants()) do
+            if v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect") then
+                v.Enabled = false
+            end
+        end
+    end)
+end
+
+DisableFullbright = function()
+    pcall(function()
+        Lighting.Ambient = OriginalAmbient
+        Lighting.Brightness = OriginalBrightness
+        Lighting.GlobalShadows = true
+        for _, v in ipairs(Lighting:GetDescendants()) do
+            if v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect") then
+                v.Enabled = true
+            end
+        end
+    end)
+end
+
+--------------------------------------------------------------------
+--                    UI LIBRARY                                  --
+--------------------------------------------------------------------
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/lates-lib/main/Main.lua"))()
+local Window = Library:CreateWindow({
+    Title = "Drk Baedi | Blade Ball",
+    Theme = "Dark",
+    Size = UDim2.fromOffset(580, 390),
+    Transparency = 0.2,
+    Blurring = true,
+    MinimizeKeybind = Enum.KeyCode.LeftAlt,
+})
+
+local Themes = {
+    Light = {
+        Primary = Color3.fromRGB(232, 232, 232), Secondary = Color3.fromRGB(255, 255, 255),
+        Component = Color3.fromRGB(245, 245, 245), Interactables = Color3.fromRGB(235, 235, 235),
+        Tab = Color3.fromRGB(50, 50, 50), Title = Color3.fromRGB(0, 0, 0),
+        Description = Color3.fromRGB(100, 100, 100), Shadow = Color3.fromRGB(255, 255, 255),
+        Outline = Color3.fromRGB(210, 210, 210), Icon = Color3.fromRGB(100, 100, 100),
+    },
+    Dark = {
+        Primary = Color3.fromRGB(30, 30, 30), Secondary = Color3.fromRGB(35, 35, 35),
+        Component = Color3.fromRGB(40, 40, 40), Interactables = Color3.fromRGB(45, 45, 45),
+        Tab = Color3.fromRGB(200, 200, 200), Title = Color3.fromRGB(240, 240, 240),
+        Description = Color3.fromRGB(200, 200, 200), Shadow = Color3.fromRGB(0, 0, 0),
+        Outline = Color3.fromRGB(40, 40, 40), Icon = Color3.fromRGB(220, 220, 220),
+    },
+    Void = {
+        Primary = Color3.fromRGB(15, 15, 15), Secondary = Color3.fromRGB(20, 20, 20),
+        Component = Color3.fromRGB(25, 25, 25), Interactables = Color3.fromRGB(30, 30, 30),
+        Tab = Color3.fromRGB(200, 200, 200), Title = Color3.fromRGB(240, 240, 240),
+        Description = Color3.fromRGB(200, 200, 200), Shadow = Color3.fromRGB(0, 0, 0),
+        Outline = Color3.fromRGB(40, 40, 40), Icon = Color3.fromRGB(220, 220, 220),
+    },
+    Blood = {
+        Primary = Color3.fromRGB(35, 12, 12), Secondary = Color3.fromRGB(45, 15, 15),
+        Component = Color3.fromRGB(55, 18, 18), Interactables = Color3.fromRGB(70, 22, 22),
+        Tab = Color3.fromRGB(240, 160, 160), Title = Color3.fromRGB(255, 200, 200),
+        Description = Color3.fromRGB(220, 150, 150), Shadow = Color3.fromRGB(15, 3, 3),
+        Outline = Color3.fromRGB(80, 30, 30), Icon = Color3.fromRGB(255, 100, 100),
+    },
+}
+
+Window:SetTheme(Themes.Dark)
+
+Window:AddTabSection({ Name = "Main", Order = 1 })
+Window:AddTabSection({ Name = "Extra", Order = 2 })
+Window:AddTabSection({ Name = "Settings", Order = 3 })
+
+local CombatTab = Window:AddTab({ Title = "Combat", Section = "Main", Icon = "rbxassetid://11963373994" })
+local MovementTab = Window:AddTab({ Title = "Movement", Section = "Main", Icon = "rbxassetid://11963373994" })
+local VisualsTab = Window:AddTab({ Title = "Visuals", Section = "Main", Icon = "rbxassetid://11963373994" })
+local PlayerTab = Window:AddTab({ Title = "Player", Section = "Extra", Icon = "rbxassetid://11963373994" })
+local MiscTab = Window:AddTab({ Title = "Misc", Section = "Extra", Icon = "rbxassetid://11963373994" })
+local SettingsTab = Window:AddTab({ Title = "Settings", Section = "Settings", Icon = "rbxassetid://11293977610" })
+
+--------------------------------------------------------------------
+--                     COMBAT TAB                                 --
+--------------------------------------------------------------------
+
+Window:AddSection({ Name = "Auto Parry", Tab = CombatTab })
+
+Window:AddToggle({ Title = "Auto Parry", Description = "Parries based on ball ETA timing", Tab = CombatTab,
+    Callback = function(v) Config.AutoParry = v end })
+
+Window:AddToggle({ Title = "Smart Parry", Description = "Advanced parry - adapts to ball speed dynamically", Tab = CombatTab,
+    Callback = function(v) Config.SmartParry = v end })
+
+Window:AddSlider({ Title = "Parry Distance", Description = "Max ball detection range (studs)", Tab = CombatTab, MaxValue = 80,
+    Callback = function(v) Config.ParryDistance = math.max(v, 5) end })
+
+Window:AddSlider({ Title = "Parry Timing", Description = "When to parry (lower = later = riskier)", Tab = CombatTab, AllowDecimals = true, MaxValue = 1,
+    Callback = function(v) Config.ParryTiming = math.max(v, 0.05) end })
+
+Window:AddSection({ Name = "Dodge & Attack", Tab = CombatTab })
+
+Window:AddToggle({ Title = "Auto Dodge", Description = "Dodge sideways when ball approaches", Tab = CombatTab,
+    Callback = function(v) Config.AutoDodge = v end })
+
+Window:AddSlider({ Title = "Dodge Distance", Description = "How close ball must be to dodge", Tab = CombatTab, MaxValue = 30,
+    Callback = function(v) Config.DodgeDistance = math.max(v, 5) end })
+
+Window:AddToggle({ Title = "Auto Spam Click", Description = "Rapidly clicks (useful for abilities)", Tab = CombatTab,
+    Callback = function(v) Config.AutoSpam = v end })
+
+Window:AddSlider({ Title = "Spam Delay", Description = "Click delay (lower = faster)", Tab = CombatTab, AllowDecimals = true, MaxValue = 1,
+    Callback = function(v) Config.SpamDelay = math.max(v, 0.03) end })
+
+Window:AddSection({ Name = "Hitbox", Tab = CombatTab })
+
+Window:AddToggle({ Title = "Hitbox Expander", Description = "Enlarges enemy hitboxes", Tab = CombatTab,
+    Callback = function(v) Config.HitboxExpander = v if not v then ResetHitboxes() end end })
+
+Window:AddSlider({ Title = "Hitbox Size", Description = "Enemy hitbox (studs)", Tab = CombatTab, MaxValue = 30,
+    Callback = function(v) Config.HitboxSize = math.max(v, 5) end })
+
+Window:AddSection({ Name = "Utility", Tab = CombatTab })
+
+Window:AddToggle({ Title = "Auto Equip Sword", Description = "Auto equips weapon from backpack", Tab = CombatTab,
+    Callback = function(v) Config.AutoEquip = v end })
+
+--------------------------------------------------------------------
+--                    MOVEMENT TAB                                --
+--------------------------------------------------------------------
+
+Window:AddSection({ Name = "Speed & Jump", Tab = MovementTab })
+
+Window:AddToggle({ Title = "Speed Boost", Description = "Override walk speed", Tab = MovementTab,
+    Callback = function(v) Config.SpeedEnabled = v if not v then pcall(function() GetHumanoid().WalkSpeed = 16 end) end end })
+
+Window:AddSlider({ Title = "Speed Value", Description = "Walk speed (default 16)", Tab = MovementTab, MaxValue = 120,
+    Callback = function(v) Config.SpeedValue = math.max(v, 16) end })
+
+Window:AddToggle({ Title = "Jump Boost", Description = "Override jump power", Tab = MovementTab,
+    Callback = function(v) Config.JumpEnabled = v if not v then pcall(function() local h = GetHumanoid() h.JumpPower = 50 h.UseJumpPower = true end) end end })
+
+Window:AddSlider({ Title = "Jump Value", Description = "Jump power (default 50)", Tab = MovementTab, MaxValue = 250,
+    Callback = function(v) Config.JumpValue = math.max(v, 50) end })
+
+Window:AddToggle({ Title = "Infinite Jump", Description = "Jump mid-air unlimited times", Tab = MovementTab,
+    Callback = function(v) Config.InfiniteJump = v if v then SetupInfiniteJump() end end })
+
+Window:AddSection({ Name = "Flight & Clip", Tab = MovementTab })
+
+Window:AddToggle({ Title = "Fly", Description = "WASD + Space/Shift", Tab = MovementTab,
+    Callback = function(v) Config.FlyEnabled = v if v then StartFly() else StopFly() end end })
+
+Window:AddSlider({ Title = "Fly Speed", Description = "Flight velocity", Tab = MovementTab, MaxValue = 200,
+    Callback = function(v) Config.FlySpeed = math.max(v, 20) end })
+
+Window:AddToggle({ Title = "Noclip", Description = "Walk through walls", Tab = MovementTab,
+    Callback = function(v) Config.NoclipEnabled = v end })
+
+Window:AddSection({ Name = "Protection", Tab = MovementTab })
+
+Window:AddToggle({ Title = "Anti Fling", Description = "Prevents being flung", Tab = MovementTab,
+    Callback = function(v) Config.AntiFling = v end })
+
+Window:AddToggle({ Title = "Anti Slow", Description = "Prevents speed debuffs", Tab = MovementTab,
+    Callback = function(v) Config.AntiSlow = v end })
+
+--------------------------------------------------------------------
+--                     VISUALS TAB                                --
+--------------------------------------------------------------------
+
+Window:AddSection({ Name = "Player ESP", Tab = VisualsTab })
+
+Window:AddToggle({ Title = "Player ESP", Description = "Highlight all players with HP and distance", Tab = VisualsTab,
+    Callback = function(v) Config.ESPEnabled = v if v then EnableAllESP() else DisableAllESP() end end })
+
+Window:AddSection({ Name = "Ball ESP", Tab = VisualsTab })
+
+Window:AddToggle({ Title = "Ball ESP", Description = "Highlights the ball with distance, speed, and targeting info", Tab = VisualsTab,
+    Callback = function(v) Config.BallESP = v if v then EnableBallESP() else DisableBallESP() end end })
+
+Window:AddSection({ Name = "World", Tab = VisualsTab })
+
+Window:AddToggle({ Title = "Fullbright", Description = "Removes darkness and shadows", Tab = VisualsTab,
+    Callback = function(v) Config.Fullbright = v if v then EnableFullbright() else DisableFullbright() end end })
+
+Window:AddToggle({ Title = "No Particles", Description = "Remove particles for better FPS", Tab = VisualsTab,
+    Callback = function(v) Config.NoParticles = v pcall(function() for _, x in ipairs(workspace:GetDescendants()) do
+        if x:IsA("ParticleEmitter") or x:IsA("Trail") or x:IsA("Fire") or x:IsA("Smoke") or x:IsA("Sparkles") then x.Enabled = not v end end end) end })
+
+Window:AddSection({ Name = "Camera", Tab = VisualsTab })
+
+Window:AddToggle({ Title = "FOV Changer", Description = "Change field of view", Tab = VisualsTab,
+    Callback = function(v) Config.FOVEnabled = v if not v then Camera.FieldOfView = OriginalFOV end end })
+
+Window:AddSlider({ Title = "FOV Value", Description = "FOV (default 70)", Tab = VisualsTab, MaxValue = 120,
+    Callback = function(v) Config.FOVValue = math.max(v, 30) end })
+
+--------------------------------------------------------------------
+--                      PLAYER TAB                                --
+--------------------------------------------------------------------
+
+Window:AddSection({ Name = "Teleport", Tab = PlayerTab })
+
+Window:AddInput({ Title = "Player Name", Description = "Enter name", Tab = PlayerTab,
+    Callback = function(t) Config.TeleportTarget = t end })
+
+Window:AddButton({ Title = "Teleport to Player", Description = "TP to named player", Tab = PlayerTab,
+    Callback = function()
+        if Config.TeleportTarget == "" then Window:Notify({ Title = "Error", Description = "Enter a name!", Duration = 3 }) return end
+        local myRoot = GetRootPart() if not myRoot then return end
+        local target = FindPlayerByName(Config.TeleportTarget)
+        if target and target.Character then
+            local tRoot = target.Character:FindFirstChild("HumanoidRootPart")
+            if tRoot then myRoot.CFrame = tRoot.CFrame * CFrame.new(0, 0, 3)
+                Window:Notify({ Title = "Done", Description = "TP to " .. target.DisplayName, Duration = 3 }) return end
+        end
+        Window:Notify({ Title = "Not Found", Description = "Player not found", Duration = 3 })
+    end })
+
+Window:AddButton({ Title = "Teleport to Nearest", Description = "TP behind closest player", Tab = PlayerTab,
+    Callback = function()
+        local myRoot = GetRootPart() if not myRoot then return end
+        local target = GetNearestPlayer()
+        if target and target.Character then
+            local tRoot = target.Character:FindFirstChild("HumanoidRootPart")
+            if tRoot then myRoot.CFrame = tRoot.CFrame * CFrame.new(0, 0, 3)
+                Window:Notify({ Title = "Done", Description = "TP to " .. target.DisplayName, Duration = 3 }) end
+        else Window:Notify({ Title = "Error", Description = "No target!", Duration = 3 }) end
+    end })
+
+Window:AddSection({ Name = "Server", Tab = PlayerTab })
+
+Window:AddButton({ Title = "Rejoin Server", Description = "Reconnect", Tab = PlayerTab,
+    Callback = function()
+        Window:Notify({ Title = "Rejoining", Description = "Reconnecting...", Duration = 2 })
+        task.wait(1) TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end })
+
+Window:AddButton({ Title = "Server Hop", Description = "Join different server", Tab = PlayerTab,
+    Callback = function()
+        Window:Notify({ Title = "Hopping", Description = "Finding server...", Duration = 3 })
+        task.wait(0.5)
+        pcall(function()
+            local data = game:GetService("HttpService"):JSONDecode(
+                game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+            if data and data.data then
+                for _, s in ipairs(data.data) do
+                    if s.playing < s.maxPlayers and s.id ~= game.JobId then
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer) return end
+                end
+            end
+            Window:Notify({ Title = "Failed", Description = "No servers", Duration = 3 })
+        end)
+    end })
+
+Window:AddButton({ Title = "Reset Character", Description = "Instantly reset", Tab = PlayerTab,
+    Callback = function() pcall(function() GetHumanoid().Health = 0 end) end })
+
+--------------------------------------------------------------------
+--                      MISC TAB                                  --
+--------------------------------------------------------------------
+
+Window:AddSection({ Name = "Performance", Tab = MiscTab })
+
+Window:AddButton({ Title = "FPS Boost", Description = "Reduce quality for better FPS", Tab = MiscTab,
+    Callback = function()
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+            for _, v in ipairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then v.Enabled = false end
+                if v:IsA("Texture") then v.Transparency = 1 end
+            end
+            Lighting.GlobalShadows = false Lighting.FogEnd = 9e9
+            for _, v in ipairs(Lighting:GetDescendants()) do
+                if v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("SunRaysEffect") or v:IsA("DepthOfFieldEffect") then v.Enabled = false end
+            end
+        end)
+        Window:Notify({ Title = "FPS Boost", Description = "Quality reduced!", Duration = 3 })
+    end })
+
+Window:AddSection({ Name = "Remotes", Tab = MiscTab })
+
+Window:AddButton({ Title = "Re-scan Remotes", Description = "Rescan parry remotes", Tab = MiscTab,
+    Callback = function()
+        ParryRemote = nil FindParryRemote()
+        local msg = ParryRemote and ("Found: " .. ParryRemote.Name) or "No remotes (click method active)"
+        Window:Notify({ Title = "Scan Done", Description = msg, Duration = 5 })
+    end })
+
+Window:AddSection({ Name = "Info", Tab = MiscTab })
+
+Window:AddParagraph({ Title = "Player Info",
+    Description = "Name: " .. LocalPlayer.DisplayName .. "\nUser: @" .. LocalPlayer.Name .. "\nID: " .. LocalPlayer.UserId .. "\nGame: Blade Ball", Tab = MiscTab })
+
+Window:AddSection({ Name = "Discord", Tab = MiscTab })
+
+Window:AddParagraph({ Title = "Join Drk Baedi Discord!", Description = "discord.gg/kAXF2VFCU\n\nUpdates, scripts, and community!", Tab = MiscTab })
+
+Window:AddButton({ Title = "Copy Discord Invite", Description = "Copy discord.gg/kAXF2VFCU", Tab = MiscTab,
+    Callback = function()
+        pcall(function() setclipboard("https://discord.gg/kAXF2VFCU") end)
+        Window:Notify({ Title = "Copied!", Description = "discord.gg/kAXF2VFCU", Duration = 4 })
+    end })
+
+--------------------------------------------------------------------
+--                     SETTINGS TAB                               --
+--------------------------------------------------------------------
+
+Window:AddKeybind({ Title = "Minimize Keybind", Description = "Set UI toggle key", Tab = SettingsTab,
+    Callback = function(Key) Window:SetSetting("Keybind", Key) end })
+
+Window:AddDropdown({ Title = "Theme", Description = "Change UI theme", Tab = SettingsTab,
+    Options = { ["Light"] = "Light", ["Dark"] = "Dark", ["Void"] = "Void", ["Blood"] = "Blood" },
+    Callback = function(t) if Themes[t] then Window:SetTheme(Themes[t]) end end })
+
+Window:AddToggle({ Title = "UI Blur", Description = "Blur behind UI (graphics 8+)", Default = true, Tab = SettingsTab,
+    Callback = function(v) Window:SetSetting("Blur", v) end })
+
+Window:AddSlider({ Title = "UI Transparency", Description = "Background transparency", Tab = SettingsTab, AllowDecimals = true, MaxValue = 1,
+    Callback = function(v) Window:SetSetting("Transparency", v) end })
+
+Window:AddSection({ Name = "About", Tab = SettingsTab })
+
+Window:AddParagraph({ Title = "Drk Baedi v1.0",
+    Description = "Blade Ball Script\nDiscord: discord.gg/kAXF2VFCU\n25+ features | PC + Mobile\n\nPress LeftAlt to toggle", Tab = SettingsTab })
+
+Window:AddButton({ Title = "Destroy Script", Description = "Unload Drk Baedi completely", Tab = SettingsTab,
+    Callback = function()
+        for k, v in pairs(Config) do
+            if typeof(v) == "boolean" then Config[k] = false end
+        end
+        StopFly() ResetHitboxes() DisableAllESP() DisableBallESP() DisableFullbright()
+        Camera.FieldOfView = OriginalFOV
+        pcall(function() GetHumanoid().WalkSpeed = 16 end)
+        pcall(function() local h = GetHumanoid() h.JumpPower = 50 end)
+        for _, conn in pairs(Connections) do
+            if typeof(conn) == "RBXScriptConnection" then pcall(function() conn:Disconnect() end) end
+        end
+        pcall(function() local g = game:GetService("CoreGui"):FindFirstChild("DrkMobile") if g then g:Destroy() end end)
+        Window:Notify({ Title = "Goodbye", Description = "Drk Baedi unloaded.\ndiscord.gg/kAXF2VFCU", Duration = 5 })
+    end })
+
+--------------------------------------------------------------------
+--                     MAIN LOOP                                  --
+--------------------------------------------------------------------
+
+local espClock = 0
+local hitboxClock = 0
+local ballEspClock = 0
+local equipClock = 0
+
+Connections.MainLoop = RunService.Heartbeat:Connect(function(dt)
+    if not GetCharacter() or not IsAlive() then return end
+
+    if Config.SmartParry then pcall(RunSmartParry)
+    elseif Config.AutoParry then pcall(RunAutoParry) end
+
+    if Config.AutoDodge then pcall(RunAutoDodge) end
+    if Config.AutoSpam then pcall(RunAutoSpam) end
+
+    hitboxClock = hitboxClock + dt
+    if Config.HitboxExpander and hitboxClock >= 0.5 then hitboxClock = 0 pcall(ExpandHitboxes) end
+
+    equipClock = equipClock + dt
+    if Config.AutoEquip and equipClock >= 1 then equipClock = 0 pcall(RunAutoEquip) end
+
+    if Config.SpeedEnabled then pcall(function() GetHumanoid().WalkSpeed = Config.SpeedValue end) end
+    if Config.JumpEnabled then pcall(function() local h = GetHumanoid() h.UseJumpPower = true h.JumpPower = Config.JumpValue end) end
+    if Config.NoclipEnabled then pcall(RunNoclip) end
+    if Config.AntiFling then pcall(RunAntiFling) end
+    if Config.AntiSlow then pcall(RunAntiSlow) end
+    if Config.FOVEnabled then pcall(function() Camera.FieldOfView = Config.FOVValue end) end
+
+    espClock = espClock + dt
+    if Config.ESPEnabled and espClock >= 0.25 then espClock = 0 pcall(UpdateESPInfo) end
+
+    ballEspClock = ballEspClock + dt
+    if Config.BallESP and ballEspClock >= 0.1 then ballEspClock = 0 pcall(UpdateBallESP) end
+end)
+
+--------------------------------------------------------------------
+--                  RESPAWN HANDLER                               --
+--------------------------------------------------------------------
+
+Connections.Respawn = LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(1.5)
+    if Config.SpeedEnabled then pcall(function() char:FindFirstChildOfClass("Humanoid").WalkSpeed = Config.SpeedValue end) end
+    if Config.JumpEnabled then pcall(function() local h = char:FindFirstChildOfClass("Humanoid") h.UseJumpPower = true h.JumpPower = Config.JumpValue end) end
+    if Config.FlyEnabled then StopFly() task.wait(0.5) StartFly() end
+    if Config.AutoEquip then task.delay(1, function() pcall(RunAutoEquip) end) end
+    task.delay(2, function() pcall(FindParryRemote) end)
+end)
+
+--------------------------------------------------------------------
+--                     MOBILE BUTTON                              --
+--------------------------------------------------------------------
+
+if IsMobile then
+    pcall(function()
+        local gui = Instance.new("ScreenGui")
+        gui.Name = "DrkMobile"
+        gui.ResetOnSpawn = false
+        gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        gui.DisplayOrder = 999
+        local ok = pcall(function() gui.Parent = game:GetService("CoreGui") end)
+        if not ok then gui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
+
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.fromOffset(52, 52)
+        btn.Position = UDim2.new(0, 14, 0.4, 0)
+        btn.AnchorPoint = Vector2.new(0, 0.5)
+        btn.BackgroundColor3 = Color3.fromRGB(35, 12, 12)
+        btn.TextColor3 = Color3.fromRGB(255, 100, 100)
+        btn.Text = "D"
+        btn.Font = Enum.Font.GothamBlack
+        btn.TextSize = 26
+        btn.AutoButtonColor = true
+        btn.Parent = gui
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 14)
+        local st = Instance.new("UIStroke", btn)
+        st.Color = Color3.fromRGB(200, 50, 50)
+        st.Thickness = 2
+
+        local dragging, dragStart, startPos, wasDragged = false, nil, nil, false
+        btn.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true wasDragged = false dragStart = input.Position startPos = btn.Position
+                input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+            end
+        end)
+        btn.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+                local delta = input.Position - dragStart
+                if delta.Magnitude > 8 then wasDragged = true
+                    btn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end
+            end
+        end)
+        btn.MouseButton1Click:Connect(function()
+            if not wasDragged then SimulateKey(Enum.KeyCode.LeftAlt, 0.05) end
+        end)
+    end)
+end
+
+--------------------------------------------------------------------
+--                    WELCOME                                     --
+--------------------------------------------------------------------
+
+Window:Notify({
+    Title = "Drk Baedi Loaded",
+    Description = "Blade Ball | 25+ Features\nDiscord: discord.gg/kAXF2VFCU\n" .. (IsMobile and "Tap [D] to toggle" or "Press LeftAlt to toggle"),
+    Duration = 10,
+})
+
+print("==========================================")
+print("  Drk Baedi v1.0 | Blade Ball")
+print("  Discord: discord.gg/kAXF2VFCU")
+print("==========================================")
