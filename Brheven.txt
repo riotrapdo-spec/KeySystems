@@ -1332,3 +1332,36 @@ end)
 
 task.wait(1.5)
 Notify("GOLDEN v1 Beta", "Welcome " .. Player.Name .. "!\nBrookhaven RP Hub loaded!\nRightCtrl to toggle UI\n\nCredit: Golden", 6)
+--[[
+    ╔═══════════════════════════════════════════════════════╗
+    ║         GOLDEN v1 BETA - BROOKHAVEN RP HUB           ║
+    ║              Created by: Golden                       ║
+    ║                                                       ║
+    ║  LICENSE:                                             ║
+    ║  Copyright © 2025 Golden. All Rights Reserved.        ║
+    ║                                                       ║
+    ║  This software is proprietary and confidential.       ║
+    ║  Unauthorized copying, redistribution, modification,  ║
+    ║  reverse engineering, decompilation, or any form of   ║
+    ║  reproduction of this software, in whole or in part,  ║
+    ║  is strictly prohibited without prior written         ║
+    ║  permission from the copyright holder.                ║
+    ║                                                       ║
+    ║  Any unauthorized use, distribution, or modification  ║
+    ║  of this code will result in:                         ║
+    ║  1. Immediate DMCA takedown notice                    ║
+    ║  2. Legal action under applicable copyright laws      ║
+    ║  3. Permanent ban from all Golden services            ║
+    ║                                                       ║
+    ║  By using this software, you agree to these terms.    ║
+    ║                                                       ║
+    ║  Discord: https://discord.gg/zZF5FJ6Qs               ║
+    ║  Author: Golden                                       ║
+    ╚═══════════════════════════════════════════════════════╝
+]]
+
+-- ANTI-STEAL: This script is licensed. Do not redistribute.
+local _LICENSE_CHECK = "GOLDEN_V1_BETA_LICENSED"
+if not _LICENSE_CHECK then return end
+
+-- [PASTE THE ENTIRE BROOKHAVEN SCRIPT FROM PREVIOUS MESSAGE HERE]
