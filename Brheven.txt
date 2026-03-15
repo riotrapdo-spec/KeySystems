@@ -1,0 +1,1334 @@
+--[[
+    ╔═══════════════════════════════════════════════════════╗
+    ║         GOLDEN v1 BETA - BROOKHAVEN RP               ║
+    ║              Created by: Golden                       ║
+    ║          No Blur • Clean • YouTube Ready              ║
+    ╚═══════════════════════════════════════════════════════╝
+    
+    Game: Brookhaven RP
+    Features: Trolling, Speed, Fly, ESP, Fun Tools
+]]
+
+-- ═══════════════════════════════════════
+-- CLEANUP
+-- ═══════════════════════════════════════
+if _G.GoldenLoaded then
+    pcall(function() Library:Destroy() end)
+    task.wait(0.5)
+end
+_G.GoldenLoaded = true
+
+for _, key in pairs({
+    "InfiniteJump","InfJumpConn","Noclip","NoclipConn","GodMode","GodModeConn",
+    "Spinning","SpinBV","RainbowChar","FlyEnabled","FlyConn","FlySetup",
+    "FlyInputConn","FlySpeed","PlayerESPEnabled","ESPConn1","AntiAFKConn",
+    "AutoClick","SpinSpd","ClickAuraEnabled","ClickAuraConn",
+    "InvisEnabled","ChatSpamEnabled","AnnoyBotEnabled","TargetPlayer",
+    "FollowEnabled","FollowConn","OrbitEnabled","OrbitConn","FlingEnabled","FlingConn",
+    "CarSpeed","NightVision","FB","HeadSize","BodySize"
+}) do
+    if _G[key] then
+        if typeof(_G[key]) == "RBXScriptConnection" then
+            pcall(function() _G[key]:Disconnect() end)
+        elseif typeof(_G[key]) == "Instance" then
+            pcall(function() _G[key]:Destroy() end)
+        end
+        _G[key] = nil
+    end
+end
+
+-- ═══════════════════════════════════════
+-- BLUR KILLER
+-- ═══════════════════════════════════════
+local Lighting = game:GetService("Lighting")
+
+local function KillBlur()
+    for _, v in pairs(Lighting:GetChildren()) do
+        if v:IsA("BlurEffect") then v:Destroy() end
+    end
+    pcall(function()
+        for _, v in pairs(game:GetService("CoreGui"):GetDescendants()) do
+            if v:IsA("BlurEffect") then v:Destroy() end
+        end
+    end)
+end
+
+KillBlur()
+
+-- ═══════════════════════════════════════
+-- LOAD LIBRARY
+-- ═══════════════════════════════════════
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ImInsane-1337/neverlose-ui/refs/heads/main/source/library.lua"))()
+
+Library.Folders = {
+    Directory = "GoldenHub",
+    Configs = "GoldenHub/Configs",
+    Assets = "GoldenHub/Assets",
+}
+
+local GoldAccent = Color3.fromRGB(255, 185, 0)
+local GoldGradient = Color3.fromRGB(200, 140, 0)
+Library.Theme.Accent = GoldAccent
+Library.Theme.AccentGradient = GoldGradient
+Library:ChangeTheme("Accent", GoldAccent)
+Library:ChangeTheme("AccentGradient", GoldGradient)
+
+-- Kill blur after load
+task.spawn(function()
+    for i = 1, 10 do KillBlur() task.wait(0.3) end
+end)
+
+-- ═══════════════════════════════════════
+-- SERVICES
+-- ═══════════════════════════════════════
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local TeleportService = game:GetService("TeleportService")
+local VirtualUser = game:GetService("VirtualUser")
+local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+
+local Player = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+-- ═══════════════════════════════════════
+-- UTILITY FUNCTIONS
+-- ═══════════════════════════════════════
+
+local function IsAlive(p)
+    return p and p.Character
+        and p.Character:FindFirstChild("Humanoid")
+        and p.Character.Humanoid.Health > 0
+        and p.Character:FindFirstChild("HumanoidRootPart")
+end
+
+local function SafeTP(target, offset)
+    if not IsAlive(Player) or not IsAlive(target) then return false end
+    offset = offset or CFrame.new(0, 0, 5)
+    Player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * offset
+    return true
+end
+
+local function GetPlayerNames()
+    local n = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= Player then table.insert(n, p.Name) end
+    end
+    if #n == 0 then table.insert(n, "None") end
+    return n
+end
+
+local function Notify(title, desc, dur)
+    Library:Notification({
+        Title = title,
+        Description = desc,
+        Duration = dur or 3,
+        Icon = "73789337996373"
+    })
+end
+
+-- ESP
+local espObjects = {}
+
+local function ClearESP()
+    for i = #espObjects, 1, -1 do
+        pcall(function() if espObjects[i] and espObjects[i].Parent then espObjects[i]:Destroy() end end)
+        table.remove(espObjects, i)
+    end
+end
+
+local function ClearESPByTag(tag)
+    for i = #espObjects, 1, -1 do
+        if espObjects[i] and espObjects[i].Name and espObjects[i].Name:find(tag) then
+            pcall(function() espObjects[i]:Destroy() end)
+            table.remove(espObjects, i)
+        end
+    end
+end
+
+-- Brookhaven locations
+local BrookhavenLocations = {
+    ["Spawn"] = CFrame.new(0, 5, 0),
+    ["Hospital"] = CFrame.new(-192, 5, -47),
+    ["Police Station"] = CFrame.new(113, 5, -130),
+    ["Fire Station"] = CFrame.new(198, 5, -83),
+    ["School"] = CFrame.new(-80, 5, 180),
+    ["Mall"] = CFrame.new(230, 5, 150),
+    ["Bank"] = CFrame.new(150, 5, 50),
+    ["Airport"] = CFrame.new(-300, 5, 200),
+    ["Gas Station"] = CFrame.new(80, 5, -50),
+    ["Church"] = CFrame.new(-150, 5, 100),
+    ["Park"] = CFrame.new(50, 5, 200),
+    ["Beach"] = CFrame.new(-250, 5, -200),
+    ["Mountain Top"] = CFrame.new(0, 300, 0),
+    ["Sky Box"] = CFrame.new(0, 1000, 0),
+    ["Underground"] = CFrame.new(0, -50, 0),
+    ["Map Edge"] = CFrame.new(2000, 50, 2000),
+}
+
+-- ═══════════════════════════════════════
+-- WINDOW
+-- ═══════════════════════════════════════
+
+local Window = Library:Window({
+    Name = "GOLDEN v1 Beta",
+    SubName = "Brookhaven RP | Credit: Golden",
+    Logo = "120959262762131"
+})
+
+local KeybindList = Library:KeybindList("Golden Keybinds")
+
+Library:Watermark({
+    "GOLDEN v1 Beta",
+    "Credit: Golden",
+    120959262762131
+})
+
+task.spawn(function()
+    while _G.GoldenLoaded do
+        local ok, FPS = pcall(function()
+            return math.floor(1 / RunService.RenderStepped:Wait())
+        end)
+        if not ok then break end
+        pcall(function()
+            Library:Watermark({
+                "GOLDEN v1 Beta",
+                "Brookhaven RP",
+                120959262762131,
+                "FPS: " .. (FPS or 0),
+                "Players: " .. #Players:GetPlayers(),
+                "Ping: " .. math.floor(Player:GetNetworkPing() * 1000) .. "ms",
+            })
+        end)
+        task.wait(0.5)
+    end
+end)
+
+-- ═══════════════════════════════════════════════════════════════
+-- CATEGORY: PLAYER
+-- ═══════════════════════════════════════════════════════════════
+
+Window:Category("Player")
+
+-- ═══════════════════════════════════════
+-- PAGE: MOVEMENT
+-- ═══════════════════════════════════════
+
+local MovePage = Window:Page({Name = "Movement", Icon = "138827881557940"})
+
+local SpeedSec = MovePage:Section({Name = "Speed & Jump", Side = 1})
+
+SpeedSec:Slider({
+    Name = "WalkSpeed",
+    Flag = "WalkSpeed",
+    Min = 16, Max = 300, Default = 16, Suffix = "",
+    Callback = function(v)
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.WalkSpeed = v
+        end
+    end
+})
+
+SpeedSec:Slider({
+    Name = "JumpPower",
+    Flag = "JumpPower",
+    Min = 50, Max = 500, Default = 50, Suffix = "",
+    Callback = function(v)
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.JumpPower = v
+        end
+    end
+})
+
+SpeedSec:Slider({
+    Name = "Gravity",
+    Flag = "Gravity",
+    Min = 0, Max = 500, Default = 196, Suffix = "",
+    Callback = function(v) Workspace.Gravity = v end
+})
+
+SpeedSec:Toggle({
+    Name = "Infinite Jump",
+    Flag = "InfJump",
+    Default = false,
+    Callback = function(v)
+        _G.InfiniteJump = v
+        if v then
+            _G.InfJumpConn = UserInputService.JumpRequest:Connect(function()
+                if _G.InfiniteJump and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                    Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                end
+            end)
+        else
+            if _G.InfJumpConn then _G.InfJumpConn:Disconnect() end
+        end
+    end
+})
+
+SpeedSec:Toggle({
+    Name = "Noclip",
+    Flag = "Noclip",
+    Default = false,
+    Callback = function(v)
+        _G.Noclip = v
+        if v then
+            _G.NoclipConn = RunService.Stepped:Connect(function()
+                if _G.Noclip and Player.Character then
+                    for _, p in pairs(Player.Character:GetDescendants()) do
+                        if p:IsA("BasePart") then p.CanCollide = false end
+                    end
+                end
+            end)
+        else
+            if _G.NoclipConn then _G.NoclipConn:Disconnect() end
+        end
+    end
+})
+
+SpeedSec:Toggle({
+    Name = "God Mode (Client)",
+    Flag = "GodMode",
+    Default = false,
+    Callback = function(v)
+        _G.GodMode = v
+        if v then
+            _G.GodModeConn = RunService.Heartbeat:Connect(function()
+                if _G.GodMode and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                    Player.Character.Humanoid.Health = Player.Character.Humanoid.MaxHealth
+                end
+            end)
+        else
+            if _G.GodModeConn then _G.GodModeConn:Disconnect() end
+        end
+    end
+})
+
+-- Fly Section
+local FlySec = MovePage:Section({Name = "Flight", Side = 2})
+
+FlySec:Toggle({
+    Name = "Fly (Press E)",
+    Flag = "FlySetup",
+    Default = false,
+    Callback = function(v)
+        if v and not _G.FlySetup then
+            _G.FlySetup = true
+            _G.FlyEnabled = false
+            _G.FlySpeed = _G.FlySpeed or 60
+            local bv, bg
+            _G.FlyInputConn = UserInputService.InputBegan:Connect(function(input, gpe)
+                if gpe or input.KeyCode ~= Enum.KeyCode.E then return end
+                _G.FlyEnabled = not _G.FlyEnabled
+                local char = Player.Character
+                if not char then return end
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                local hum = char:FindFirstChild("Humanoid")
+                if not hrp or not hum then return end
+                if _G.FlyEnabled then
+                    bv = Instance.new("BodyVelocity")
+                    bv.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+                    bv.Velocity = Vector3.zero
+                    bv.Parent = hrp
+                    bg = Instance.new("BodyGyro")
+                    bg.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
+                    bg.P = 1e4
+                    bg.Parent = hrp
+                    hum.PlatformStand = true
+                    _G.FlyConn = RunService.RenderStepped:Connect(function()
+                        if not _G.FlyEnabled then return end
+                        local cam = Camera
+                        local d = Vector3.zero
+                        if UserInputService:IsKeyDown(Enum.KeyCode.W) then d = d + cam.CFrame.LookVector end
+                        if UserInputService:IsKeyDown(Enum.KeyCode.S) then d = d - cam.CFrame.LookVector end
+                        if UserInputService:IsKeyDown(Enum.KeyCode.A) then d = d - cam.CFrame.RightVector end
+                        if UserInputService:IsKeyDown(Enum.KeyCode.D) then d = d + cam.CFrame.RightVector end
+                        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then d = d + Vector3.yAxis end
+                        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then d = d - Vector3.yAxis end
+                        bv.Velocity = d * (_G.FlySpeed or 60)
+                        bg.CFrame = cam.CFrame
+                    end)
+                    Notify("FLY", "ON - WASD + Space/Shift", 2)
+                else
+                    if bv then bv:Destroy() end
+                    if bg then bg:Destroy() end
+                    hum.PlatformStand = false
+                    if _G.FlyConn then _G.FlyConn:Disconnect() end
+                    Notify("FLY", "OFF", 1.5)
+                end
+            end)
+            Notify("FLY", "Press E to toggle!", 3)
+        elseif not v then
+            _G.FlyEnabled = false
+            _G.FlySetup = false
+            if _G.FlyInputConn then _G.FlyInputConn:Disconnect() end
+            if _G.FlyConn then _G.FlyConn:Disconnect() end
+        end
+    end
+})
+
+FlySec:Slider({
+    Name = "Fly Speed",
+    Flag = "FlySpd",
+    Min = 10, Max = 300, Default = 60, Suffix = "",
+    Callback = function(v) _G.FlySpeed = v end
+})
+
+FlySec:Slider({
+    Name = "FOV",
+    Flag = "FOV",
+    Min = 30, Max = 120, Default = 70, Suffix = "°",
+    Callback = function(v) Camera.FieldOfView = v end
+})
+
+FlySec:Button({
+    Name = "Reset Character",
+    Callback = function()
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.Health = 0
+        end
+    end
+})
+
+FlySec:Button({
+    Name = "Rejoin Server",
+    Callback = function()
+        Notify("SERVER", "Rejoining...", 2)
+        task.wait(1)
+        TeleportService:Teleport(game.PlaceId, Player)
+    end
+})
+
+-- ═══════════════════════════════════════
+-- PAGE: TELEPORT
+-- ═══════════════════════════════════════
+
+local TPPage = Window:Page({Name = "Teleport", Icon = "138827881557940"})
+
+local LocSec = TPPage:Section({Name = "Map Locations", Side = 1})
+
+local locationNames = {}
+for name, _ in pairs(BrookhavenLocations) do
+    table.insert(locationNames, name)
+end
+table.sort(locationNames)
+
+LocSec:Dropdown({
+    Name = "Teleport to Location",
+    Flag = "TPLocation",
+    Default = {},
+    Items = locationNames,
+    Multi = false,
+    Callback = function(v)
+        if type(v) == "table" then v = v[1] end
+        if not v then return end
+        local cf = BrookhavenLocations[v]
+        if cf and IsAlive(Player) then
+            Player.Character.HumanoidRootPart.CFrame = cf
+            Notify("TP", "Teleported to " .. v, 2)
+        end
+    end
+})
+
+LocSec:Button({
+    Name = "TP to Spawn",
+    Callback = function()
+        if IsAlive(Player) then
+            Player.Character.HumanoidRootPart.CFrame = CFrame.new(0, 5, 0)
+            Notify("TP", "Spawn!", 1.5)
+        end
+    end
+})
+
+LocSec:Button({
+    Name = "TP to Sky (1000 studs)",
+    Callback = function()
+        if IsAlive(Player) then
+            Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0)
+            Notify("TP", "Up in the sky!", 2)
+        end
+    end
+})
+
+LocSec:Button({
+    Name = "TP to Void",
+    Callback = function()
+        if IsAlive(Player) then
+            Player.Character.HumanoidRootPart.CFrame = CFrame.new(9999, -500, 9999)
+            Notify("TP", "Into the void!", 2)
+        end
+    end
+})
+
+-- Player TP
+local PTPSec = TPPage:Section({Name = "Player Teleport", Side = 2})
+
+PTPSec:Dropdown({
+    Name = "TP to Player",
+    Flag = "TPPlayer",
+    Default = {},
+    Items = GetPlayerNames(),
+    Multi = false,
+    Callback = function(v)
+        if type(v) == "table" then v = v[1] end
+        if not v or v == "None" then return end
+        local t = Players:FindFirstChild(v)
+        if t and SafeTP(t, CFrame.new(0, 0, 4)) then
+            Notify("TP", "-> " .. v, 2)
+        end
+    end
+})
+
+PTPSec:Button({
+    Name = "TP to Nearest Player",
+    Callback = function()
+        if not IsAlive(Player) then return end
+        local best, bestD = nil, math.huge
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= Player and IsAlive(p) then
+                local d = (Player.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                if d < bestD then best, bestD = p, d end
+            end
+        end
+        if best then
+            SafeTP(best, CFrame.new(0, 0, 4))
+            Notify("TP", best.Name .. " (" .. math.floor(bestD) .. "m)", 2)
+        end
+    end
+})
+
+PTPSec:Button({
+    Name = "TP All Players to You",
+    Callback = function()
+        Notify("INFO", "This only works with admin commands", 3)
+    end
+})
+
+PTPSec:Button({
+    Name = "Bring Nearest Player (Fling)",
+    Callback = function()
+        if not IsAlive(Player) then return end
+        local best, bestD = nil, math.huge
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= Player and IsAlive(p) then
+                local d = (Player.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                if d < bestD then best, bestD = p, d end
+            end
+        end
+        if best and IsAlive(best) then
+            -- TP to them and spin to fling
+            Player.Character.HumanoidRootPart.CFrame = best.Character.HumanoidRootPart.CFrame
+            Notify("FLING", "Flung at " .. best.Name, 2)
+        end
+    end
+})
+
+-- ═══════════════════════════════════════════════════════════════
+-- CATEGORY: TROLLING
+-- ═══════════════════════════════════════════════════════════════
+
+Window:Category("Trolling")
+
+-- ═══════════════════════════════════════
+-- PAGE: TROLL TOOLS
+-- ═══════════════════════════════════════
+
+local TrollPage = Window:Page({Name = "Troll Tools", Icon = "138827881557940"})
+
+local FunnySec = TrollPage:Section({Name = "Funny", Side = 1})
+
+FunnySec:Toggle({
+    Name = "Spin Character",
+    Flag = "Spin",
+    Default = false,
+    Callback = function(v)
+        _G.Spinning = v
+        if v then
+            if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                _G.SpinBV = Instance.new("BodyAngularVelocity")
+                _G.SpinBV.MaxTorque = Vector3.new(0, math.huge, 0)
+                _G.SpinBV.AngularVelocity = Vector3.new(0, _G.SpinSpd or 30, 0)
+                _G.SpinBV.Parent = Player.Character.HumanoidRootPart
+            end
+        else
+            if _G.SpinBV then pcall(function() _G.SpinBV:Destroy() end) end
+        end
+    end
+})
+
+FunnySec:Slider({
+    Name = "Spin Speed",
+    Flag = "SpinSpd",
+    Min = 5, Max = 200, Default = 30, Suffix = "",
+    Callback = function(v)
+        _G.SpinSpd = v
+        if _G.SpinBV then _G.SpinBV.AngularVelocity = Vector3.new(0, v, 0) end
+    end
+})
+
+FunnySec:Toggle({
+    Name = "Rainbow Character",
+    Flag = "Rainbow",
+    Default = false,
+    Callback = function(v)
+        _G.RainbowChar = v
+        if v then
+            task.spawn(function()
+                local hue = 0
+                while _G.RainbowChar do
+                    hue = (hue + 0.008) % 1
+                    pcall(function()
+                        if Player.Character then
+                            for _, part in pairs(Player.Character:GetDescendants()) do
+                                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                                    part.Color = Color3.fromHSV(hue, 0.85, 1)
+                                end
+                            end
+                        end
+                    end)
+                    task.wait(0.03)
+                end
+            end)
+        end
+    end
+})
+
+FunnySec:Toggle({
+    Name = "Seizure Mode",
+    Flag = "Seizure",
+    Default = false,
+    Callback = function(v)
+        _G.SeizureMode = v
+        if v then
+            task.spawn(function()
+                while _G.SeizureMode do
+                    pcall(function()
+                        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                            Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.Angles(
+                                math.random(-3, 3),
+                                math.random(-3, 3),
+                                math.random(-3, 3)
+                            )
+                        end
+                    end)
+                    task.wait(0.05)
+                end
+            end)
+        end
+    end
+})
+
+FunnySec:Toggle({
+    Name = "Headless (Tiny Head)",
+    Flag = "Headless",
+    Default = false,
+    Callback = function(v)
+        pcall(function()
+            if Player.Character and Player.Character:FindFirstChild("Head") then
+                if v then
+                    Player.Character.Head.Size = Vector3.new(0.1, 0.1, 0.1)
+                    if Player.Character.Head:FindFirstChild("Mesh") then
+                        Player.Character.Head.Mesh.Scale = Vector3.new(0.1, 0.1, 0.1)
+                    end
+                else
+                    Player.Character.Head.Size = Vector3.new(2, 1, 1)
+                    if Player.Character.Head:FindFirstChild("Mesh") then
+                        Player.Character.Head.Mesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+                    end
+                end
+            end
+        end)
+    end
+})
+
+FunnySec:Slider({
+    Name = "Head Size",
+    Flag = "HeadSize",
+    Min = 1, Max = 50, Default = 10, Suffix = "",
+    Callback = function(v)
+        pcall(function()
+            if Player.Character and Player.Character:FindFirstChild("Head") then
+                local s = v / 10
+                Player.Character.Head.Size = Vector3.new(2 * s, 1 * s, 1 * s)
+                if Player.Character.Head:FindFirstChild("Mesh") then
+                    Player.Character.Head.Mesh.Scale = Vector3.new(1.25 * s, 1.25 * s, 1.25 * s)
+                end
+            end
+        end)
+    end
+})
+
+-- Annoy Section
+local AnnoySec = TrollPage:Section({Name = "Annoy", Side = 2})
+
+AnnoySec:Toggle({
+    Name = "Follow Nearest Player",
+    Flag = "FollowPlayer",
+    Default = false,
+    Callback = function(v)
+        _G.FollowEnabled = v
+        if v then
+            _G.FollowConn = RunService.Heartbeat:Connect(function()
+                if not _G.FollowEnabled or not IsAlive(Player) then return end
+                local best, bestD = nil, math.huge
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= Player and IsAlive(p) then
+                        local d = (Player.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                        if d < bestD then best, bestD = p, d end
+                    end
+                end
+                if best and bestD > 5 then
+                    local dir = (best.Character.HumanoidRootPart.Position - Player.Character.HumanoidRootPart.Position).Unit
+                    Player.Character.Humanoid:Move(Vector3.new(dir.X, 0, dir.Z))
+                end
+            end)
+        else
+            if _G.FollowConn then _G.FollowConn:Disconnect() end
+        end
+    end
+})
+
+AnnoySec:Toggle({
+    Name = "Orbit Nearest Player",
+    Flag = "Orbit",
+    Default = false,
+    Callback = function(v)
+        _G.OrbitEnabled = v
+        if v then
+            task.spawn(function()
+                local angle = 0
+                local radius = _G.OrbitRadius or 10
+                while _G.OrbitEnabled do
+                    pcall(function()
+                        if IsAlive(Player) then
+                            local best, bestD = nil, math.huge
+                            for _, p in pairs(Players:GetPlayers()) do
+                                if p ~= Player and IsAlive(p) then
+                                    local d = (Player.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                                    if d < bestD then best, bestD = p, d end
+                                end
+                            end
+                            if best then
+                                angle = angle + (_G.OrbitSpeed or 5) / 100
+                                radius = _G.OrbitRadius or 10
+                                local pos = best.Character.HumanoidRootPart.Position + Vector3.new(
+                                    math.cos(angle) * radius,
+                                    0,
+                                    math.sin(angle) * radius
+                                )
+                                Player.Character.HumanoidRootPart.CFrame = CFrame.new(pos, best.Character.HumanoidRootPart.Position)
+                            end
+                        end
+                    end)
+                    task.wait(0.03)
+                end
+            end)
+        end
+    end
+})
+
+AnnoySec:Slider({
+    Name = "Orbit Radius",
+    Flag = "OrbitRad",
+    Min = 3, Max = 30, Default = 10, Suffix = " studs",
+    Callback = function(v) _G.OrbitRadius = v end
+})
+
+AnnoySec:Slider({
+    Name = "Orbit Speed",
+    Flag = "OrbitSpd",
+    Min = 1, Max = 50, Default = 5, Suffix = "",
+    Callback = function(v) _G.OrbitSpeed = v end
+})
+
+AnnoySec:Toggle({
+    Name = "Fling Mode",
+    Flag = "Fling",
+    Default = false,
+    Callback = function(v)
+        _G.FlingEnabled = v
+        if v then
+            _G.FlingConn = RunService.Heartbeat:Connect(function()
+                if not _G.FlingEnabled or not IsAlive(Player) then return end
+                pcall(function()
+                    local hrp = Player.Character.HumanoidRootPart
+                    hrp.Velocity = Vector3.new(
+                        math.random(-200, 200),
+                        math.random(50, 200),
+                        math.random(-200, 200)
+                    )
+                    hrp.RotVelocity = Vector3.new(
+                        math.random(-50, 50),
+                        math.random(-50, 50),
+                        math.random(-50, 50)
+                    )
+                end)
+            end)
+            Notify("FLING", "Touch players to fling them!", 3)
+        else
+            if _G.FlingConn then _G.FlingConn:Disconnect() end
+        end
+    end
+})
+
+AnnoySec:Button({
+    Name = "TP to Random Player",
+    Callback = function()
+        local plrs = {}
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= Player and IsAlive(p) then table.insert(plrs, p) end
+        end
+        if #plrs > 0 then
+            local r = plrs[math.random(1, #plrs)]
+            SafeTP(r, CFrame.new(0, 0, 3))
+            Notify("RANDOM TP", "-> " .. r.Name, 2)
+        end
+    end
+})
+
+-- ═══════════════════════════════════════
+-- PAGE: CHAT & SPAM
+-- ═══════════════════════════════════════
+
+local ChatPage = Window:Page({Name = "Chat & Fun", Icon = "138827881557940"})
+
+local ChatSec = ChatPage:Section({Name = "Chat Tools", Side = 1})
+
+local spamMessage = "Golden Hub on top!"
+
+ChatSec:Toggle({
+    Name = "Chat Spam",
+    Flag = "ChatSpam",
+    Default = false,
+    Callback = function(v)
+        _G.ChatSpamEnabled = v
+        if v then
+            task.spawn(function()
+                while _G.ChatSpamEnabled do
+                    pcall(function()
+                        local msg = _G.SpamMessage or spamMessage
+                        -- Add random chars to bypass duplicate filter
+                        local suffix = string.rep(" ", math.random(1, 10)) .. tostring(math.random(1000, 9999))
+                        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(msg .. suffix, "All")
+                    end)
+                    task.wait(_G.SpamDelay or 1)
+                end
+            end)
+        end
+    end
+})
+
+ChatSec:Slider({
+    Name = "Spam Delay",
+    Flag = "SpamDelay",
+    Min = 1, Max = 30, Default = 3, Suffix = " sec",
+    Callback = function(v) _G.SpamDelay = v end
+})
+
+ChatSec:Dropdown({
+    Name = "Spam Message",
+    Flag = "SpamMsg",
+    Default = {"Golden Hub on top!"},
+    Items = {
+        "Golden Hub on top!",
+        "Subscribe to Golden!",
+        "Best script hub ever!",
+        "Golden v1 Beta is fire!",
+        "Get Golden Hub free!",
+        "I love Golden Hub!",
+        "GOLDEN GOLDEN GOLDEN",
+        "This hub is insane!",
+    },
+    Multi = false,
+    Callback = function(v)
+        if type(v) == "table" then v = v[1] end
+        _G.SpamMessage = v
+    end
+})
+
+ChatSec:Button({
+    Name = "Send One Message",
+    Callback = function()
+        pcall(function()
+            game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(_G.SpamMessage or "Golden Hub!", "All")
+        end)
+    end
+})
+
+-- Sound Section
+local SoundSec = ChatPage:Section({Name = "Sound & Effects", Side = 2})
+
+SoundSec:Button({
+    Name = "Play Loud Audio",
+    Callback = function()
+        pcall(function()
+            local s = Instance.new("Sound")
+            s.SoundId = "rbxassetid://5150182847"
+            s.Volume = 10
+            s.Looped = false
+            s.Parent = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") or Workspace
+            s:Play()
+            game:GetService("Debris"):AddItem(s, 30)
+        end)
+        Notify("SOUND", "Playing audio!", 2)
+    end
+})
+
+SoundSec:Button({
+    Name = "Spam Jump",
+    Callback = function()
+        task.spawn(function()
+            for i = 1, 50 do
+                pcall(function()
+                    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                        Player.Character.Humanoid.Jump = true
+                    end
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+})
+
+SoundSec:Button({
+    Name = "Dance Emote",
+    Callback = function()
+        pcall(function()
+            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                local anim = Instance.new("Animation")
+                anim.AnimationId = "rbxassetid://5917459365"
+                local track = Player.Character.Humanoid:LoadAnimation(anim)
+                track:Play()
+            end
+        end)
+    end
+})
+
+SoundSec:Button({
+    Name = "Sit Down",
+    Callback = function()
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.Sit = true
+        end
+    end
+})
+
+SoundSec:Button({
+    Name = "Lay Down",
+    Callback = function()
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.PlatformStand = not Player.Character.Humanoid.PlatformStand
+        end
+    end
+})
+
+-- ═══════════════════════════════════════════════════════════════
+-- CATEGORY: VISUALS
+-- ═══════════════════════════════════════════════════════════════
+
+Window:Category("Visuals")
+
+-- ═══════════════════════════════════════
+-- PAGE: ESP & VISUALS
+-- ═══════════════════════════════════════
+
+local VisPage = Window:Page({Name = "ESP & Visuals", Icon = "138827881557940"})
+
+local ESPSec = VisPage:Section({Name = "Player ESP", Side = 1})
+
+local function MakeESP(target)
+    if target == Player or not target.Character then return end
+    local hrp = target.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    ClearESPByTag("ESP_" .. target.Name)
+
+    local col = Color3.fromRGB(255, 185, 0)
+
+    local hl = Instance.new("Highlight")
+    hl.Name = "ESP_" .. target.Name
+    hl.FillColor = col
+    hl.FillTransparency = 0.5
+    hl.OutlineColor = col
+    hl.OutlineTransparency = 0.1
+    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    hl.Adornee = target.Character
+    hl.Parent = target.Character
+    table.insert(espObjects, hl)
+
+    local head = target.Character:FindFirstChild("Head") or hrp
+    local bb = Instance.new("BillboardGui")
+    bb.Name = "ESP_" .. target.Name
+    bb.Size = UDim2.new(0, 180, 0, 40)
+    bb.StudsOffset = Vector3.new(0, 3, 0)
+    bb.AlwaysOnTop = true
+    bb.Adornee = head
+    bb.Parent = target.Character
+    table.insert(espObjects, bb)
+
+    local nameL = Instance.new("TextLabel")
+    nameL.BackgroundTransparency = 1
+    nameL.Size = UDim2.new(1, 0, 0, 18)
+    nameL.Font = Enum.Font.GothamBold
+    nameL.Text = target.Name
+    nameL.TextSize = 13
+    nameL.TextColor3 = col
+    nameL.TextStrokeTransparency = 0.3
+    nameL.TextStrokeColor3 = Color3.new(0, 0, 0)
+    nameL.Parent = bb
+
+    local infoL = Instance.new("TextLabel")
+    infoL.BackgroundTransparency = 1
+    infoL.Size = UDim2.new(1, 0, 0, 14)
+    infoL.Position = UDim2.new(0, 0, 0, 18)
+    infoL.Font = Enum.Font.Gotham
+    infoL.TextSize = 10
+    infoL.TextColor3 = Color3.fromRGB(255, 220, 80)
+    infoL.TextStrokeTransparency = 0.4
+    infoL.TextStrokeColor3 = Color3.new(0, 0, 0)
+    infoL.Parent = bb
+
+    task.spawn(function()
+        while bb and bb.Parent and _G.PlayerESPEnabled do
+            pcall(function()
+                if IsAlive(target) and IsAlive(Player) then
+                    local dist = math.floor((Player.Character.HumanoidRootPart.Position - target.Character.HumanoidRootPart.Position).Magnitude)
+                    infoL.Text = dist .. "m away"
+                end
+            end)
+            task.wait(0.3)
+        end
+    end)
+end
+
+local function RefreshESP()
+    ClearESP()
+    if not _G.PlayerESPEnabled then return end
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= Player and p.Character then MakeESP(p) end
+    end
+end
+
+ESPSec:Toggle({
+    Name = "Player ESP",
+    Flag = "PlayerESP",
+    Default = false,
+    Callback = function(v)
+        _G.PlayerESPEnabled = v
+        if v then
+            RefreshESP()
+            _G.ESPConn1 = Players.PlayerAdded:Connect(function(p)
+                p.CharacterAdded:Connect(function()
+                    task.wait(2)
+                    if _G.PlayerESPEnabled then MakeESP(p) end
+                end)
+            end)
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= Player then
+                    p.CharacterAdded:Connect(function()
+                        task.wait(2)
+                        if _G.PlayerESPEnabled then MakeESP(p) end
+                    end)
+                end
+            end
+        else
+            ClearESP()
+            if _G.ESPConn1 then _G.ESPConn1:Disconnect() end
+        end
+    end
+})
+
+ESPSec:Button({
+    Name = "Refresh ESP",
+    Callback = function()
+        if _G.PlayerESPEnabled then RefreshESP() end
+    end
+})
+
+-- Lighting Section
+local LightSec = VisPage:Section({Name = "Lighting & Effects", Side = 2})
+
+LightSec:Toggle({
+    Name = "Fullbright",
+    Flag = "Fullbright",
+    Default = false,
+    Callback = function(v)
+        if v then
+            _G.FB = {Lighting.Ambient, Lighting.OutdoorAmbient, Lighting.Brightness, Lighting.ClockTime, Lighting.FogEnd}
+            Lighting.Ambient = Color3.new(1, 1, 1)
+            Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+            Lighting.Brightness = 2
+            Lighting.ClockTime = 14
+            Lighting.FogEnd = 1e10
+            Lighting.FogStart = 1e10
+            for _, e in pairs(Lighting:GetDescendants()) do
+                if e:IsA("Atmosphere") or e:IsA("BloomEffect") or e:IsA("ColorCorrectionEffect") then
+                    e.Enabled = false
+                end
+                if e:IsA("BlurEffect") then e:Destroy() end
+            end
+        else
+            if _G.FB then
+                Lighting.Ambient = _G.FB[1]
+                Lighting.OutdoorAmbient = _G.FB[2]
+                Lighting.Brightness = _G.FB[3]
+                Lighting.ClockTime = _G.FB[4]
+                Lighting.FogEnd = _G.FB[5] or 10000
+            end
+            for _, e in pairs(Lighting:GetDescendants()) do
+                if e:IsA("Atmosphere") or e:IsA("BloomEffect") or e:IsA("ColorCorrectionEffect") then
+                    e.Enabled = true
+                end
+            end
+        end
+    end
+})
+
+LightSec:Toggle({
+    Name = "Night Time",
+    Flag = "NightTime",
+    Default = false,
+    Callback = function(v)
+        if v then
+            _G.OldClock = Lighting.ClockTime
+            Lighting.ClockTime = 0
+        else
+            Lighting.ClockTime = _G.OldClock or 14
+        end
+    end
+})
+
+LightSec:Slider({
+    Name = "Time of Day",
+    Flag = "TimeDay",
+    Min = 0, Max = 24, Default = 14, Suffix = "h",
+    Callback = function(v) Lighting.ClockTime = v end
+})
+
+LightSec:Toggle({
+    Name = "Night Vision",
+    Flag = "NightVis",
+    Default = false,
+    Callback = function(v)
+        if v then
+            _G.NightVision = Instance.new("ColorCorrectionEffect")
+            _G.NightVision.Name = "GoldenNV"
+            _G.NightVision.Brightness = 0.12
+            _G.NightVision.Contrast = 0.08
+            _G.NightVision.Saturation = -0.2
+            _G.NightVision.TintColor = Color3.fromRGB(255, 235, 160)
+            _G.NightVision.Parent = Lighting
+        else
+            if _G.NightVision then _G.NightVision:Destroy() end
+        end
+    end
+})
+
+LightSec:Toggle({
+    Name = "No Fog",
+    Flag = "NoFog",
+    Default = false,
+    Callback = function(v)
+        if v then
+            _G.OldFog = Lighting.FogEnd
+            Lighting.FogEnd = 1e10
+            Lighting.FogStart = 1e10
+        else
+            Lighting.FogEnd = _G.OldFog or 10000
+        end
+    end
+})
+
+-- ═══════════════════════════════════════════════════════════════
+-- CATEGORY: SERVER
+-- ═══════════════════════════════════════════════════════════════
+
+Window:Category("Server")
+
+local SrvPage = Window:Page({Name = "Server & Info", Icon = "138827881557940"})
+
+local InfoSec = SrvPage:Section({Name = "Server", Side = 1})
+
+InfoSec:Label("Game: Brookhaven RP")
+InfoSec:Label("Place: " .. game.PlaceId)
+InfoSec:Label("Player: " .. Player.Name)
+InfoSec:Label("Players: " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers)
+
+InfoSec:Button({
+    Name = "Rejoin",
+    Callback = function()
+        TeleportService:Teleport(game.PlaceId, Player)
+    end
+})
+
+InfoSec:Button({
+    Name = "Server Hop",
+    Callback = function()
+        pcall(function()
+            local data = HttpService:JSONDecode(game:HttpGetAsync(
+                "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+            ))
+            for _, srv in pairs(data.data) do
+                if srv.id ~= game.JobId and srv.playing < srv.maxPlayers then
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, srv.id, Player)
+                    return
+                end
+            end
+        end)
+    end
+})
+
+InfoSec:Button({
+    Name = "Copy Server Link",
+    Callback = function()
+        pcall(function()
+            setclipboard("roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId)
+        end)
+        Notify("COPIED", "Server link copied!", 2)
+    end
+})
+
+InfoSec:Toggle({
+    Name = "Anti AFK",
+    Flag = "AntiAFK",
+    Default = false,
+    Callback = function(v)
+        if v then
+            _G.AntiAFKConn = Player.Idled:Connect(function()
+                VirtualUser:Button2Down(Vector2.new(0, 0), Camera.CFrame)
+                task.wait(1)
+                VirtualUser:Button2Up(Vector2.new(0, 0), Camera.CFrame)
+            end)
+            Notify("AFK", "Anti AFK active!", 2)
+        else
+            if _G.AntiAFKConn then _G.AntiAFKConn:Disconnect() end
+        end
+    end
+})
+
+-- Player list
+local PLSec = SrvPage:Section({Name = "Players (Click = TP)", Side = 2})
+
+for _, p in pairs(Players:GetPlayers()) do
+    if p ~= Player then
+        PLSec:Button({
+            Name = p.Name,
+            Callback = function()
+                if SafeTP(p, CFrame.new(0, 0, 4)) then
+                    Notify("TP", "-> " .. p.Name, 1.5)
+                end
+            end
+        })
+    end
+end
+
+-- ═══════════════════════════════════════════════════════════════
+-- CATEGORY: SETTINGS
+-- ═══════════════════════════════════════════════════════════════
+
+Window:Category("Settings")
+
+local CfgPage = Window:Page({Name = "Config", Icon = "138827881557940"})
+
+local CtrlSec = CfgPage:Section({Name = "Controls", Side = 1})
+
+CtrlSec:Keybind({
+    Name = "Toggle UI",
+    Flag = "UIKey",
+    Default = Enum.KeyCode.RightControl,
+    Callback = function() Library:ToggleUI() end
+})
+
+CtrlSec:Button({
+    Name = "RESET ALL",
+    Callback = function()
+        for _, f in pairs({"InfiniteJump","Noclip","GodMode","PlayerESPEnabled","Spinning","RainbowChar","FlyEnabled","FollowEnabled","OrbitEnabled","FlingEnabled","ChatSpamEnabled","SeizureMode"}) do
+            _G[f] = false
+        end
+        ClearESP()
+        for _, c in pairs({"InfJumpConn","NoclipConn","GodModeConn","FlyConn","ESPConn1","AntiAFKConn","FlyInputConn","FollowConn","OrbitConn","FlingConn"}) do
+            if _G[c] then pcall(function() _G[c]:Disconnect() end) end
+        end
+        if _G.SpinBV then pcall(function() _G.SpinBV:Destroy() end) end
+        if _G.NightVision then pcall(function() _G.NightVision:Destroy() end) end
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.WalkSpeed = 16
+            Player.Character.Humanoid.JumpPower = 50
+        end
+        Workspace.Gravity = 196.2
+        Camera.FieldOfView = 70
+        Notify("RESET", "Everything disabled!", 2)
+    end
+})
+
+CtrlSec:Button({
+    Name = "DESTROY HUB",
+    Callback = function()
+        ClearESP()
+        _G.GoldenLoaded = false
+        for _, c in pairs({"InfJumpConn","NoclipConn","GodModeConn","FlyConn","ESPConn1","AntiAFKConn","FlyInputConn","FollowConn","OrbitConn","FlingConn"}) do
+            if _G[c] then pcall(function() _G[c]:Disconnect() end) end
+        end
+        task.wait(0.3)
+        Library:Destroy()
+    end
+})
+
+local CredSec = CfgPage:Section({Name = "Credits", Side = 2})
+
+CredSec:Label("GOLDEN v1 Beta")
+CredSec:Label("Game: Brookhaven RP")
+CredSec:Label("Creator: Golden")
+CredSec:Label("UI: Neverlose by ImInsane")
+CredSec:Label("")
+CredSec:Label("Features:")
+CredSec:Label("  Speed / Fly / Noclip")
+CredSec:Label("  Infinite Jump / God Mode")
+CredSec:Label("  12+ Map Teleports")
+CredSec:Label("  Player ESP + Distance")
+CredSec:Label("  Spin / Rainbow / Seizure")
+CredSec:Label("  Orbit / Follow / Fling")
+CredSec:Label("  Chat Spam / Fun Tools")
+CredSec:Label("  Fullbright / Night Vision")
+CredSec:Label("  Server Hop / Anti AFK")
+CredSec:Label("")
+CredSec:Label("Thanks for using Golden!")
+
+local SettingsPage = Library:CreateSettingsPage(Window, KeybindList)
+
+-- ═══════════════════════════════════════
+-- INIT
+-- ═══════════════════════════════════════
+
+Window:Init()
+
+-- Kill blur after init
+task.spawn(function()
+    for i = 1, 20 do
+        for _, v in pairs(Lighting:GetChildren()) do
+            if v:IsA("BlurEffect") then
+                v.Size = 0
+                v.Enabled = false
+                v:Destroy()
+            end
+        end
+        task.wait(0.2)
+    end
+end)
+
+Lighting.ChildAdded:Connect(function(child)
+    if child:IsA("BlurEffect") then
+        task.wait()
+        child.Size = 0
+        child.Enabled = false
+        child:Destroy()
+    end
+end)
+
+-- ═══════════════════════════════════════
+-- STARTUP
+-- ═══════════════════════════════════════
+
+task.wait(1.5)
+Notify("GOLDEN v1 Beta", "Welcome " .. Player.Name .. "!\nBrookhaven RP Hub loaded!\nRightCtrl to toggle UI\n\nCredit: Golden", 6)
