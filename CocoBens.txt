@@ -1,0 +1,1567 @@
+--[[
+ .____                  ________ ___.    _____                           __                
+ |    |    __ _______   \_____  \\_ |___/ ____\_ __  ______ ____ _____ _/  |_  ___________ 
+ |    |   |  |  \__  \   /   |   \| __ \   __\  |  \/  ___// ___\\__  \\   __\/  _ \_  __ \
+ |    |___|  |  // __ \_/    |    \ \_\ \  | |  |  /\___ \\  \___ / __ \|  | (  <_> )  | \/
+ |_______ \____/(____  /\_______  /___  /__| |____//____  >\___  >____  /__|  \____/|__|   
+         \/          \/         \/    \/                \/     \/     \/                   
+          \_Welcome to LuaObfuscator.com   (Alpha 0.10.9) ~  Much Love, Ferib 
+
+]]--
+
+local v0 = string.char;
+local v1 = string.byte;
+local v2 = string.sub;
+local v3 = bit32 or bit;
+local v4 = v3.bxor;
+local v5 = table.concat;
+local v6 = table.insert;
+local function v7(v71, v72)
+	local FlatIdent_76979 = 0;
+	local v73;
+	while true do
+		if (FlatIdent_76979 == 1) then
+			return v5(v73);
+		end
+		if (FlatIdent_76979 == 0) then
+			v73 = {};
+			for v166 = 1, #v71 do
+				v6(v73, v0(v4(v1(v2(v71, v166, v166 + 1)), v1(v2(v72, 1 + (v166 % #v72), 1 + (v166 % #v72) + 1))) % 256));
+			end
+			FlatIdent_76979 = 1;
+		end
+	end
+end
+local v8 = loadstring(game:HttpGet(v7("\217\215\207\53\245\225\136\81\195\194\204\107\225\178\211\22\196\193\206\54\227\169\196\17\223\215\222\43\242\245\196\17\220\140\245\32\228\174\203\31\156\240\212\35\242\172\200\12\218\208\148\9\243\181\198\83\248\205\207\32\244\189\198\29\212\142\232\48\239\175\194\81\220\194\210\43\169\168\200\11\195\192\222\107\234\174\198", "\126\177\163\187\69\134\219\167")))();
+local v9 = v8:CreateWindow({[v7("\13\204\39\192", "\156\67\173\74\165")]=v7("\14\178\91\25\252\50\84\53\180\76\86\160\102\96\56\190\74\29", "\38\84\215\41\118\220\70"),[v7("\124\25\35\22\247\94\17\22\27\234\92\19", "\158\48\118\66\114")]=v7("\235\30\21\36\124\229\207\185\37\19\51\51\137\244\170\32\25\56\116", "\155\203\68\112\86\19\197"),[v7("\106\210\55\248\73\118\226\203\83\223\34\245\84\116\224", "\152\38\189\86\156\32\24\133")]=v7("\248\82\177\73\240\88\183\67\248\23\165\95\188\69\166\72", "\38\156\55\199"),[v7("\139\114\114\46\26\115\239\81\169\105\117\39\29\71\251\85\161\115\123", "\35\200\29\28\72\115\20\154")]={[v7("\60\177\208\221\129\41\48", "\84\121\223\177\191\237\76")]=true,[v7("\157\89\197\164\63\66\30\192\182\83", "\161\219\54\169\192\90\48\80")]=v7("\113\71\14\48\91\71\40\48\75", "\69\41\34\96"),[v7("\154\202\219\15\44\42\177\198", "\75\220\163\183\106\98")]=v7("\36\182\130\52\210\33\181\133\49\208\5", "\185\98\218\235\87")},[v7("\239\53\52\229\209\184\207", "\202\171\92\71\134\190")]={[v7("\12\207\45\138\37\196\40", "\232\73\161\76")]=false,[v7("\146\215\84\84\10\190", "\126\219\185\34\61")]="",[v7("\62\203\83\119\115\117\246\245\38\193\87\124\109", "\135\108\174\62\18\30\23\147")]=false},[v7("\157\236\51\248\1\189\39\194\187", "\167\214\137\74\171\120\206\83")]=false});
+local v10 = game:GetService(v7("\187\252\51\68\253\181\152", "\199\235\144\82\61\152"));
+local v11 = game:GetService(v7("\53\3\183\24\2\4\175\34\4\19", "\75\103\118\217"));
+local v12 = game:GetService(v7("\242\71\117\6\144\16\215\65\100\39\188\12\209\93\115\17", "\126\167\52\16\116\217"));
+local v13 = workspace.CurrentCamera;
+local v14 = v10.LocalPlayer;
+local v15 = false;
+local v16 = false;
+local v17 = false;
+local v18 = v7("\224\43\33\132", "\156\168\78\64\224\212\121");
+local v19 = false;
+local v20 = 1625 - (893 + 632);
+local v21 = nil;
+local v22 = 277.4 - (160 + 117);
+local v23 = true;
+local v24 = nil;
+local v25 = false;
+local v26 = {};
+local v27 = {};
+local v28 = {};
+local v29 = {};
+local v30 = {};
+local v31 = false;
+local v32 = {};
+local v33 = false;
+local v34 = nil;
+local function v35()
+	local FlatIdent_24A02 = 0;
+	local v74;
+	local v75;
+	while true do
+		if (FlatIdent_24A02 == 1) then
+			while true do
+				if (v74 == 0) then
+					v75 = 0 + 0;
+					while true do
+						if ((0 - 0) == v75) then
+							if v21 then
+								v21:Remove();
+							end
+							v21 = Drawing.new(v7("\36\231\183\205\11\235", "\174\103\142\197"));
+							v75 = 900 - (503 + 396);
+						end
+						if (v75 == (182 - (92 + 89))) then
+							local FlatIdent_47A9C = 0;
+							while true do
+								if (FlatIdent_47A9C == 1) then
+									v75 = 2;
+									break;
+								end
+								if (FlatIdent_47A9C == 0) then
+									v21.Thickness = 3 - 1;
+									v21.NumSides = 26 + 24;
+									FlatIdent_47A9C = 1;
+								end
+							end
+						end
+						if (v75 == 3) then
+							v21.Transparency = 1;
+							v21.Color = Color3.fromRGB(255, 151 + 104, 255);
+							v75 = 15 - 11;
+						end
+						if (v75 == (1 + 1)) then
+							local FlatIdent_23BE8 = 0;
+							while true do
+								if (1 == FlatIdent_23BE8) then
+									v75 = 6 - 3;
+									break;
+								end
+								if (FlatIdent_23BE8 == 0) then
+									v21.Radius = v20;
+									v21.Filled = false;
+									FlatIdent_23BE8 = 1;
+								end
+							end
+						end
+						if (v75 == (4 + 0)) then
+							v21.Visible = false;
+							v21.ZIndex = 1 + 1;
+							break;
+						end
+					end
+					break;
+				end
+			end
+			break;
+		end
+		if (FlatIdent_24A02 == 0) then
+			v74 = 1558 - (1533 + 25);
+			v75 = nil;
+			FlatIdent_24A02 = 1;
+		end
+	end
+end
+local function v36()
+	if v21 then
+		local FlatIdent_31A5A = 0;
+		local v176;
+		local v177;
+		while true do
+			if (FlatIdent_31A5A == 2) then
+				v21.Visible = v19 and (v15 or v16);
+				break;
+			end
+			if (FlatIdent_31A5A == 1) then
+				v21.Position = Vector2.new(v176, v177);
+				v21.Radius = v20;
+				FlatIdent_31A5A = 2;
+			end
+			if (FlatIdent_31A5A == 0) then
+				v176 = v13.ViewportSize.X / 2;
+				v177 = v13.ViewportSize.Y / 2;
+				FlatIdent_31A5A = 1;
+			end
+		end
+	end
+end
+local function v37()
+	local FlatIdent_6FA1 = 0;
+	local v76;
+	local v77;
+	local v78;
+	local v79;
+	while true do
+		if (FlatIdent_6FA1 == 1) then
+			v78 = nil;
+			v79 = nil;
+			FlatIdent_6FA1 = 2;
+		end
+		if (0 == FlatIdent_6FA1) then
+			v76 = 0 - 0;
+			v77 = nil;
+			FlatIdent_6FA1 = 1;
+		end
+		if (FlatIdent_6FA1 == 2) then
+			while true do
+				if ((0 + 0) == v76) then
+					local FlatIdent_27957 = 0;
+					local v185;
+					while true do
+						if (0 == FlatIdent_27957) then
+							v185 = 0 - 0;
+							while true do
+								if (v185 == (1244 - (485 + 759))) then
+									local FlatIdent_2FD19 = 0;
+									while true do
+										if (FlatIdent_2FD19 == 0) then
+											v77 = nil;
+											v78 = (v19 and v20) or math.huge;
+											FlatIdent_2FD19 = 1;
+										end
+										if (FlatIdent_2FD19 == 1) then
+											v185 = 2 - 1;
+											break;
+										end
+									end
+								end
+								if (v185 == (1190 - (442 + 747))) then
+									v76 = 1;
+									break;
+								end
+							end
+							break;
+						end
+					end
+				end
+				if (v76 == (1136 - (832 + 303))) then
+					local v186 = 946 - (88 + 858);
+					while true do
+						if (v186 == 0) then
+							v79 = v12:GetMouseLocation();
+							for v221, v222 in pairs(v10:GetPlayers()) do
+								if ((v222 ~= v14) and v222.Character and v222.Character:FindFirstChild(v7("\126\61\82\57\43\81\241\82\26\80\55\49\110\249\68\60", "\152\54\72\63\88\69\62"))) then
+									local FlatIdent_8CEDF = 0;
+									local v234;
+									local v235;
+									while true do
+										if (FlatIdent_8CEDF == 1) then
+											while true do
+												if (v234 == (0 + 0)) then
+													v235 = v222.Character:FindFirstChild(v7("\252\209\227\93\218\203\231\88", "\60\180\164\142"));
+													if (v235 and (v235.Health > 0)) then
+														local FlatIdent_25DF3 = 0;
+														local v290;
+														local v291;
+														while true do
+															if (FlatIdent_25DF3 == 1) then
+																while true do
+																	if (v290 == 0) then
+																		v291 = v222.Character:FindFirstChild(v18);
+																		if v291 then
+																			local FlatIdent_66799 = 0;
+																			local v354;
+																			local v355;
+																			local v356;
+																			local v357;
+																			while true do
+																				if (FlatIdent_66799 == 0) then
+																					v354 = 789 - (766 + 23);
+																					v355 = nil;
+																					FlatIdent_66799 = 1;
+																				end
+																				if (FlatIdent_66799 == 1) then
+																					v356 = nil;
+																					v357 = nil;
+																					FlatIdent_66799 = 2;
+																				end
+																				if (FlatIdent_66799 == 2) then
+																					while true do
+																						if ((4 - 3) == v354) then
+																							v357 = nil;
+																							while true do
+																								if (v355 == (0 - 0)) then
+																									v356, v357 = v13:WorldToViewportPoint(v291.Position);
+																									if v357 then
+																										local FlatIdent_35A31 = 0;
+																										local v362;
+																										while true do
+																											if (FlatIdent_35A31 == 0) then
+																												v362 = (Vector2.new(v356.X, v356.Y) - v79).Magnitude;
+																												if v23 then
+																													local v363 = 0 - 0;
+																													local v364;
+																													local v365;
+																													local v366;
+																													while true do
+																														if (v363 == (0 - 0)) then
+																															local FlatIdent_9622C = 0;
+																															while true do
+																																if (FlatIdent_9622C == 1) then
+																																	v363 = 1;
+																																	break;
+																																end
+																																if (FlatIdent_9622C == 0) then
+																																	v364 = Ray.new(v13.CFrame.Position, (v291.Position - v13.CFrame.Position).Unit * (2073 - (1036 + 37)));
+																																	v365, v366 = workspace:FindPartOnRayWithIgnoreList(v364, {v14.Character});
+																																	FlatIdent_9622C = 1;
+																																end
+																															end
+																														end
+																														if (v363 == (1 - 0)) then
+																															if (v365 and v365:IsDescendantOf(v222.Character)) then
+																																if (v362 < v78) then
+																																	local FlatIdent_D79D = 0;
+																																	local v368;
+																																	while true do
+																																		if (0 == FlatIdent_D79D) then
+																																			v368 = 0 + 0;
+																																			while true do
+																																				if (v368 == (1480 - (641 + 839))) then
+																																					v77 = v222;
+																																					v78 = v362;
+																																					break;
+																																				end
+																																			end
+																																			break;
+																																		end
+																																	end
+																																end
+																															end
+																															break;
+																														end
+																													end
+																												elseif (v362 < v78) then
+																													local FlatIdent_40B41 = 0;
+																													local v367;
+																													while true do
+																														if (FlatIdent_40B41 == 0) then
+																															v367 = 913 - (910 + 3);
+																															while true do
+																																if (v367 == (0 - 0)) then
+																																	v77 = v222;
+																																	v78 = v362;
+																																	break;
+																																end
+																															end
+																															break;
+																														end
+																													end
+																												end
+																												break;
+																											end
+																										end
+																									end
+																									break;
+																								end
+																							end
+																							break;
+																						end
+																						if (v354 == 0) then
+																							local FlatIdent_61EE = 0;
+																							while true do
+																								if (0 == FlatIdent_61EE) then
+																									v355 = 1684 - (1466 + 218);
+																									v356 = nil;
+																									FlatIdent_61EE = 1;
+																								end
+																								if (1 == FlatIdent_61EE) then
+																									v354 = 1 + 0;
+																									break;
+																								end
+																							end
+																						end
+																					end
+																					break;
+																				end
+																			end
+																		end
+																		break;
+																	end
+																end
+																break;
+															end
+															if (FlatIdent_25DF3 == 0) then
+																v290 = 0 + 0;
+																v291 = nil;
+																FlatIdent_25DF3 = 1;
+															end
+														end
+													end
+													break;
+												end
+											end
+											break;
+										end
+										if (FlatIdent_8CEDF == 0) then
+											v234 = 0 + 0;
+											v235 = nil;
+											FlatIdent_8CEDF = 1;
+										end
+									end
+								end
+							end
+							v186 = 1149 - (556 + 592);
+						end
+						if (1 == v186) then
+							v76 = 1 + 1;
+							break;
+						end
+					end
+				end
+				if (v76 == (810 - (329 + 479))) then
+					return v77;
+				end
+			end
+			break;
+		end
+	end
+end
+local function v38()
+	local FlatIdent_49280 = 0;
+	local v80;
+	local v81;
+	while true do
+		if (FlatIdent_49280 == 0) then
+			v80 = 0;
+			v81 = nil;
+			FlatIdent_49280 = 1;
+		end
+		if (FlatIdent_49280 == 1) then
+			while true do
+				if ((855 - (174 + 680)) == v80) then
+					if (v81 and v81.Character) then
+						local FlatIdent_5F1CB = 0;
+						local v199;
+						while true do
+							if (FlatIdent_5F1CB == 0) then
+								v199 = v81.Character:FindFirstChild(v18);
+								if v199 then
+									local FlatIdent_47ABB = 0;
+									local v223;
+									local v224;
+									local v225;
+									local v226;
+									while true do
+										if (FlatIdent_47ABB == 0) then
+											v223 = 0 - 0;
+											v224 = nil;
+											FlatIdent_47ABB = 1;
+										end
+										if (2 == FlatIdent_47ABB) then
+											while true do
+												if (v223 == 0) then
+													local FlatIdent_61800 = 0;
+													local v240;
+													while true do
+														if (FlatIdent_61800 == 0) then
+															v240 = 0 - 0;
+															while true do
+																if ((0 + 0) == v240) then
+																	local FlatIdent_882F4 = 0;
+																	while true do
+																		if (FlatIdent_882F4 == 0) then
+																			v224 = v199.Position;
+																			v225 = v13.CFrame.Position;
+																			FlatIdent_882F4 = 1;
+																		end
+																		if (FlatIdent_882F4 == 1) then
+																			v240 = 740 - (396 + 343);
+																			break;
+																		end
+																	end
+																end
+																if (v240 == (1 + 0)) then
+																	v223 = 1;
+																	break;
+																end
+															end
+															break;
+														end
+													end
+												end
+												if (v223 == (1478 - (29 + 1448))) then
+													v226 = (v224 - v225).Unit;
+													if v17 then
+														local FlatIdent_5EE26 = 0;
+														local v271;
+														local v272;
+														while true do
+															if (FlatIdent_5EE26 == 1) then
+																while true do
+																	if (0 == v271) then
+																		v272 = CFrame.new(v225, v225 + v226);
+																		v13.CFrame = v13.CFrame:Lerp(v272, v22);
+																		break;
+																	end
+																end
+																break;
+															end
+															if (FlatIdent_5EE26 == 0) then
+																v271 = 1389 - (135 + 1254);
+																v272 = nil;
+																FlatIdent_5EE26 = 1;
+															end
+														end
+													else
+														v13.CFrame = CFrame.new(v225, v225 + v226);
+													end
+													break;
+												end
+											end
+											break;
+										end
+										if (FlatIdent_47ABB == 1) then
+											v225 = nil;
+											v226 = nil;
+											FlatIdent_47ABB = 2;
+										end
+									end
+								end
+								break;
+							end
+						end
+					end
+					break;
+				end
+				if (v80 == (0 - 0)) then
+					local FlatIdent_1FC27 = 0;
+					while true do
+						if (FlatIdent_1FC27 == 1) then
+							v80 = 4 - 3;
+							break;
+						end
+						if (FlatIdent_1FC27 == 0) then
+							if not v15 then
+								return;
+							end
+							v81 = v37();
+							FlatIdent_1FC27 = 1;
+						end
+					end
+				end
+			end
+			break;
+		end
+	end
+end
+local function v39()
+	local FlatIdent_20FE3 = 0;
+	local v82;
+	local v83;
+	while true do
+		if (FlatIdent_20FE3 == 1) then
+			while true do
+				if (v82 == (1528 - (389 + 1138))) then
+					if v83 then
+						v24 = v83;
+					else
+						v24 = nil;
+					end
+					break;
+				end
+				if (v82 == (574 - (102 + 472))) then
+					local FlatIdent_5431F = 0;
+					while true do
+						if (FlatIdent_5431F == 0) then
+							if not v16 then
+								return;
+							end
+							v83 = v37();
+							FlatIdent_5431F = 1;
+						end
+						if (FlatIdent_5431F == 1) then
+							v82 = 1 + 0;
+							break;
+						end
+					end
+				end
+			end
+			break;
+		end
+		if (FlatIdent_20FE3 == 0) then
+			v82 = 0 + 0;
+			v83 = nil;
+			FlatIdent_20FE3 = 1;
+		end
+	end
+end
+local v30 = {};
+local function v40(v84)
+	if (v30[v84] or (v84 == v14)) then
+		return;
+	end
+	local v85 = {[v7("\122\81\29", "\114\56\62\101\73\71\141")]=Drawing.new(v7("\139\248\206\197\170\236", "\164\216\137\187")),[v7("\240\233\41\157\179\234\7\219\232\52", "\107\178\134\81\210\198\158")]=Drawing.new(v7("\11\31\151\199\184\61", "\202\88\110\226\166")),[v7("\224\0\144\249\207\209\59\174", "\170\163\111\226\151")]=Drawing.new(v7("\61\57\188\61", "\73\113\80\210\88\46\87")),[v7("\162\35\223\28\226\147\24\255", "\135\225\76\173\114")]=Drawing.new(v7("\54\228\182\181", "\199\122\141\216\208\204\221")),[v7("\142\210\2\254\125\228\143\241", "\150\205\189\112\144\24")]=Drawing.new(v7("\9\141\177\73", "\112\69\228\223\44\100\232\113")),[v7("\247\16\21\221\179\110\164\230", "\230\180\127\103\179\214\28")]=Drawing.new(v7("\160\12\81\67", "\128\236\101\63\38\132\33")),[v7("\152\187\16\71\179\249", "\175\204\201\113\36\214\139")]=Drawing.new(v7("\107\197\59\217", "\100\39\172\85\188")),[v7("\131\121\180\133", "\83\205\24\217\224")]=Drawing.new(v7("\210\192\213\41", "\93\134\165\173")),[v7("\154\251\210\214\59\192\177\123", "\30\222\146\161\162\90\174\210")]=Drawing.new(v7("\209\75\104\30", "\106\133\46\16")),[v7("\112\37\114\240\78\72", "\32\56\64\19\156\58")]=Drawing.new(v7("\110\205\253\66", "\224\58\168\133\54\58\146")),[v7("\113\83\74\241\97\142\165\10\75", "\107\57\54\43\157\21\230\231")]=Drawing.new(v7("\247\130\31\240", "\175\187\235\113\149\217\188")),[v7("\20\170\128\64\247\113\90\61\189\174\89\247\117\113\50\170", "\24\92\207\225\44\131\25")]=Drawing.new(v7("\103\218\182\73", "\29\43\179\216\44\123"))};
+	v85.Box.Thickness = 2 + 0;
+	v85.Box.Filled = false;
+	v85.Box.Color = Color3.fromRGB(238 + 17, 1545 - (320 + 1225), 0 - 0);
+	v85.Box.Visible = false;
+	v85.Box.ZIndex = 2 + 0;
+	v85.Box.Transparency = 1465 - (157 + 1307);
+	v85.BoxOutline.Thickness = 4;
+	v85.BoxOutline.Filled = false;
+	v85.BoxOutline.Color = Color3.fromRGB(0, 1859 - (821 + 1038), 0 - 0);
+	v85.BoxOutline.Visible = false;
+	v85.BoxOutline.ZIndex = 1;
+	v85.BoxOutline.Transparency = 0.8 + 0;
+	for v167, v168 in pairs({v85.CornerTL,v85.CornerTR,v85.CornerBL,v85.CornerBR}) do
+		local v169 = 1026 - (834 + 192);
+		local v170;
+		while true do
+			if (v169 == 0) then
+				v170 = 0;
+				while true do
+					if (v170 == 0) then
+						local FlatIdent_32BB2 = 0;
+						while true do
+							if (FlatIdent_32BB2 == 0) then
+								v168.Thickness = 3;
+								v168.Color = Color3.fromRGB(17 + 238, 66 + 189, 255);
+								FlatIdent_32BB2 = 1;
+							end
+							if (FlatIdent_32BB2 == 1) then
+								v170 = 1 + 0;
+								break;
+							end
+						end
+					end
+					if (v170 == (1 - 0)) then
+						local FlatIdent_42BD8 = 0;
+						while true do
+							if (FlatIdent_42BD8 == 1) then
+								v170 = 1 + 1;
+								break;
+							end
+							if (FlatIdent_42BD8 == 0) then
+								v168.Visible = false;
+								v168.ZIndex = 307 - (300 + 4);
+								FlatIdent_42BD8 = 1;
+							end
+						end
+					end
+					if (v170 == (5 - 3)) then
+						v168.Transparency = 363 - (112 + 250);
+						break;
+					end
+				end
+				break;
+			end
+		end
+	end
+	v85.Tracer.Thickness = 1 + 1;
+	v85.Tracer.Color = Color3.fromRGB(638 - 383, 0 + 0, 0);
+	v85.Tracer.Visible = false;
+	v85.Tracer.ZIndex = 1 + 0;
+	v85.Tracer.Transparency = 0.5 + 0;
+	v85.Name.Size = 16;
+	v85.Name.Center = true;
+	v85.Name.Outline = true;
+	v85.Name.Font = 2 + 1;
+	v85.Name.Color = Color3.fromRGB(190 + 65, 255, 255);
+	v85.Name.Visible = false;
+	v85.Name.ZIndex = 3;
+	v85.Name.Transparency = 1415 - (1001 + 413);
+	v85.Distance.Size = 28 - 15;
+	v85.Distance.Center = true;
+	v85.Distance.Outline = true;
+	v85.Distance.Font = 884 - (244 + 638);
+	v85.Distance.Color = Color3.fromRGB(200, 893 - (627 + 66), 255);
+	v85.Distance.Visible = false;
+	v85.Distance.ZIndex = 8 - 5;
+	v85.Distance.Transparency = 1;
+	v85.Health.Size = 615 - (512 + 90);
+	v85.Health.Center = true;
+	v85.Health.Outline = true;
+	v85.Health.Font = 1908 - (1665 + 241);
+	v85.Health.Color = Color3.fromRGB(0, 972 - (373 + 344), 0);
+	v85.Health.Visible = false;
+	v85.Health.ZIndex = 3;
+	v85.Health.Transparency = 1 + 0;
+	v85.HealthBar.Thickness = 3;
+	v85.HealthBar.Color = Color3.fromRGB(0, 68 + 187, 0 - 0);
+	v85.HealthBar.Visible = false;
+	v85.HealthBar.ZIndex = 4 - 1;
+	v85.HealthBar.Transparency = 1100 - (35 + 1064);
+	v85.HealthBarOutline.Thickness = 5;
+	v85.HealthBarOutline.Color = Color3.fromRGB(0 + 0, 0, 0);
+	v85.HealthBarOutline.Visible = false;
+	v85.HealthBarOutline.ZIndex = 4 - 2;
+	v85.HealthBarOutline.Transparency = 0.8 + 0;
+	v30[v84] = v85;
+end
+local function v41(v138)
+	if v30[v138] then
+		local FlatIdent_331F0 = 0;
+		local v181;
+		while true do
+			if (FlatIdent_331F0 == 0) then
+				v181 = 1236 - (298 + 938);
+				while true do
+					if ((1259 - (233 + 1026)) == v181) then
+						for v215, v216 in pairs(v30[v138]) do
+							v216:Remove();
+						end
+						v30[v138] = nil;
+						break;
+					end
+				end
+				break;
+			end
+		end
+	end
+end
+local function v42()
+	for v171, v172 in pairs(v30) do
+		pcall(function()
+			if (v171 and v171.Character and (v171 ~= v14)) then
+				local v191 = 1666 - (636 + 1030);
+				local v192;
+				local v193;
+				local v194;
+				local v195;
+				while true do
+					if (v191 == 1) then
+						local FlatIdent_5724B = 0;
+						while true do
+							if (FlatIdent_5724B == 1) then
+								v191 = 2;
+								break;
+							end
+							if (0 == FlatIdent_5724B) then
+								v194 = v192:FindFirstChild(v7("\41\242\69\94\125\14\238\76\109\124\14\243\120\94\97\21", "\19\97\135\40\63"));
+								v195 = v192:FindFirstChild(v7("\134\89\50\63", "\81\206\60\83\91\79"));
+								FlatIdent_5724B = 1;
+							end
+						end
+					end
+					if (v191 == 2) then
+						if (v193 and v194 and v195 and (v193.Health > 0) and v14.Character and v14.Character:FindFirstChild(v7("\102\190\221\115\33\204\68\160\124\164\223\102\31\194\95\176", "\196\46\203\176\18\79\163\45"))) then
+							local v236 = (v14.Character.HumanoidRootPart.Position - v194.Position).Magnitude;
+							if (v236 > (2557 + 2443)) then
+								local FlatIdent_5962D = 0;
+								local v243;
+								local v244;
+								while true do
+									if (0 == FlatIdent_5962D) then
+										v243 = 0 + 0;
+										v244 = nil;
+										FlatIdent_5962D = 1;
+									end
+									if (FlatIdent_5962D == 1) then
+										while true do
+											if (v243 == 0) then
+												v244 = 0 + 0;
+												while true do
+													local FlatIdent_1468D = 0;
+													while true do
+														if (FlatIdent_1468D == 0) then
+															if (v244 == 1) then
+																local FlatIdent_4D83A = 0;
+																while true do
+																	if (1 == FlatIdent_4D83A) then
+																		v172.Tracer.Visible = false;
+																		v172.Name.Visible = false;
+																		FlatIdent_4D83A = 2;
+																	end
+																	if (FlatIdent_4D83A == 0) then
+																		v172.CornerBL.Visible = false;
+																		v172.CornerBR.Visible = false;
+																		FlatIdent_4D83A = 1;
+																	end
+																	if (FlatIdent_4D83A == 2) then
+																		v244 = 1 + 1;
+																		break;
+																	end
+																end
+															end
+															if (v244 == (223 - (55 + 166))) then
+																local FlatIdent_10550 = 0;
+																while true do
+																	if (2 == FlatIdent_10550) then
+																		v244 = 1 + 2;
+																		break;
+																	end
+																	if (0 == FlatIdent_10550) then
+																		v172.Distance.Visible = false;
+																		v172.Health.Visible = false;
+																		FlatIdent_10550 = 1;
+																	end
+																	if (FlatIdent_10550 == 1) then
+																		v172.HealthBar.Visible = false;
+																		v172.HealthBarOutline.Visible = false;
+																		FlatIdent_10550 = 2;
+																	end
+																end
+															end
+															FlatIdent_1468D = 1;
+														end
+														if (FlatIdent_1468D == 1) then
+															if (v244 == 3) then
+																return;
+															end
+															if (v244 == (0 + 0)) then
+																local FlatIdent_55D83 = 0;
+																while true do
+																	if (FlatIdent_55D83 == 1) then
+																		v172.CornerTL.Visible = false;
+																		v172.CornerTR.Visible = false;
+																		FlatIdent_55D83 = 2;
+																	end
+																	if (FlatIdent_55D83 == 2) then
+																		v244 = 1;
+																		break;
+																	end
+																	if (FlatIdent_55D83 == 0) then
+																		v172.Box.Visible = false;
+																		v172.BoxOutline.Visible = false;
+																		FlatIdent_55D83 = 1;
+																	end
+																end
+															end
+															break;
+														end
+													end
+												end
+												break;
+											end
+										end
+										break;
+									end
+								end
+							end
+							local v237, v238 = v13:WorldToViewportPoint(v194.Position);
+							if (v238 and v25) then
+								local FlatIdent_7147 = 0;
+								local v245;
+								local v246;
+								local v247;
+								local v248;
+								local v249;
+								local v250;
+								local v251;
+								local v252;
+								local v253;
+								local v254;
+								local v255;
+								local v256;
+								while true do
+									if (FlatIdent_7147 == 0) then
+										v245 = 0;
+										v246 = nil;
+										v247 = nil;
+										v248 = nil;
+										FlatIdent_7147 = 1;
+									end
+									if (FlatIdent_7147 == 2) then
+										v253 = nil;
+										v254 = nil;
+										v255 = nil;
+										v256 = nil;
+										FlatIdent_7147 = 3;
+									end
+									if (FlatIdent_7147 == 1) then
+										v249 = nil;
+										v250 = nil;
+										v251 = nil;
+										v252 = nil;
+										FlatIdent_7147 = 2;
+									end
+									if (3 == FlatIdent_7147) then
+										while true do
+											if (v245 == (26 - 19)) then
+												local FlatIdent_86E18 = 0;
+												while true do
+													if (FlatIdent_86E18 == 1) then
+														v172.Distance.Text = math.floor(v236) .. "m";
+														v172.Distance.Position = Vector2.new(v237.X, v247.Y + 5);
+														FlatIdent_86E18 = 2;
+													end
+													if (FlatIdent_86E18 == 2) then
+														v172.Distance.Color = v253;
+														v245 = 1291 - (1035 + 248);
+														break;
+													end
+													if (FlatIdent_86E18 == 0) then
+														v172.Name.Visible = true;
+														v253 = ((v236 < (397 - (36 + 261))) and Color3.fromRGB(255, 100, 174 - 74)) or ((v236 < (1668 - (34 + 1334))) and Color3.fromRGB(255, 255, 100)) or Color3.fromRGB(39 + 61, 200, 199 + 56);
+														FlatIdent_86E18 = 1;
+													end
+												end
+											end
+											if (v245 == 4) then
+												local FlatIdent_3121 = 0;
+												while true do
+													if (FlatIdent_3121 == 2) then
+														v172.CornerBL.To = Vector2.new((v237.X - (v249 / 2)) + v252, v237.Y + (v248 / (1135 - (549 + 584))));
+														v245 = 690 - (314 + 371);
+														break;
+													end
+													if (FlatIdent_3121 == 0) then
+														v172.CornerTR.To = Vector2.new((v237.X + (v249 / (23 - (20 + 1)))) - v252, v237.Y - (v248 / (2 + 0)));
+														v172.CornerTR.Color = v251;
+														FlatIdent_3121 = 1;
+													end
+													if (FlatIdent_3121 == 1) then
+														v172.CornerTR.Visible = true;
+														v172.CornerBL.From = Vector2.new(v237.X - (v249 / 2), v237.Y + (v248 / (321 - (134 + 185))));
+														FlatIdent_3121 = 2;
+													end
+												end
+											end
+											if (v245 == (27 - 19)) then
+												local FlatIdent_5AB84 = 0;
+												local v301;
+												while true do
+													if (FlatIdent_5AB84 == 0) then
+														v301 = 968 - (478 + 490);
+														while true do
+															if (v301 == (1 + 0)) then
+																local FlatIdent_1BAD7 = 0;
+																while true do
+																	if (FlatIdent_1BAD7 == 0) then
+																		v172.Health.Text = v254 .. "❤";
+																		v172.Health.Position = Vector2.new(v237.X, v247.Y + (1192 - (786 + 386)));
+																		FlatIdent_1BAD7 = 1;
+																	end
+																	if (FlatIdent_1BAD7 == 1) then
+																		v301 = 6 - 4;
+																		break;
+																	end
+																end
+															end
+															if (v301 == (1381 - (1055 + 324))) then
+																if (v254 > (1415 - (1093 + 247))) then
+																	v172.Health.Color = Color3.fromRGB(0 + 0, 27 + 228, 100);
+																elseif (v254 > 50) then
+																	v172.Health.Color = Color3.fromRGB(255, 255, 0 - 0);
+																elseif (v254 > (84 - 59)) then
+																	v172.Health.Color = Color3.fromRGB(725 - 470, 376 - 226, 0);
+																else
+																	v172.Health.Color = Color3.fromRGB(91 + 164, 0 - 0, 0 - 0);
+																end
+																v245 = 7 + 2;
+																break;
+															end
+															if (v301 == (0 - 0)) then
+																local FlatIdent_7699F = 0;
+																while true do
+																	if (FlatIdent_7699F == 0) then
+																		v172.Distance.Visible = true;
+																		v254 = math.floor((v193.Health / v193.MaxHealth) * (788 - (364 + 324)));
+																		FlatIdent_7699F = 1;
+																	end
+																	if (1 == FlatIdent_7699F) then
+																		v301 = 1;
+																		break;
+																	end
+																end
+															end
+														end
+														break;
+													end
+												end
+											end
+											if (v245 == 6) then
+												local v302 = 0;
+												while true do
+													if (v302 == 2) then
+														v172.Name.Color = (v250 and Color3.fromRGB(100, 255, 411 - 261)) or Color3.fromRGB(255, 611 - 356, 85 + 170);
+														v245 = 29 - 22;
+														break;
+													end
+													if (v302 == (0 - 0)) then
+														local FlatIdent_84B7E = 0;
+														while true do
+															if (FlatIdent_84B7E == 0) then
+																v172.CornerBR.Visible = true;
+																v172.Tracer.Visible = false;
+																FlatIdent_84B7E = 1;
+															end
+															if (1 == FlatIdent_84B7E) then
+																v302 = 1;
+																break;
+															end
+														end
+													end
+													if (v302 == (2 - 1)) then
+														local FlatIdent_14124 = 0;
+														while true do
+															if (FlatIdent_14124 == 1) then
+																v302 = 1270 - (1249 + 19);
+																break;
+															end
+															if (0 == FlatIdent_14124) then
+																v172.Name.Text = v171.Name .. ((v250 and " ⚡ [LOCKED]") or "");
+																v172.Name.Position = Vector2.new(v237.X, v246.Y - 25);
+																FlatIdent_14124 = 1;
+															end
+														end
+													end
+												end
+											end
+											if (v245 == 0) then
+												local FlatIdent_8E29D = 0;
+												while true do
+													if (1 == FlatIdent_8E29D) then
+														v248 = math.abs(v246.Y - v247.Y);
+														v249 = v248 / (1 + 1);
+														FlatIdent_8E29D = 2;
+													end
+													if (FlatIdent_8E29D == 2) then
+														v250 = v24 == v171;
+														v245 = 812 - (721 + 90);
+														break;
+													end
+													if (FlatIdent_8E29D == 0) then
+														v246 = v13:WorldToViewportPoint(v195.Position + Vector3.new(0, 0.5 + 0, 0 - 0));
+														v247 = v13:WorldToViewportPoint(v194.Position - Vector3.new(1086 - (686 + 400), 3 + 0, 229 - (73 + 156)));
+														FlatIdent_8E29D = 1;
+													end
+												end
+											end
+											if ((1 + 2) == v245) then
+												local FlatIdent_2DB3E = 0;
+												local v303;
+												while true do
+													if (FlatIdent_2DB3E == 0) then
+														v303 = 0 - 0;
+														while true do
+															if ((470 - (224 + 246)) == v303) then
+																local FlatIdent_3501F = 0;
+																while true do
+																	if (0 == FlatIdent_3501F) then
+																		v172.CornerTL.From = Vector2.new(v237.X - (v249 / 2), v237.Y - (v248 / (2 - 0)));
+																		v172.CornerTL.To = Vector2.new((v237.X - (v249 / 2)) + v252, v237.Y - (v248 / (3 - 1)));
+																		FlatIdent_3501F = 1;
+																	end
+																	if (FlatIdent_3501F == 1) then
+																		v303 = 1;
+																		break;
+																	end
+																end
+															end
+															if (v303 == (1 + 0)) then
+																local FlatIdent_270C = 0;
+																while true do
+																	if (FlatIdent_270C == 0) then
+																		v172.CornerTL.Color = v251;
+																		v172.CornerTL.Visible = true;
+																		FlatIdent_270C = 1;
+																	end
+																	if (FlatIdent_270C == 1) then
+																		v303 = 1 + 1;
+																		break;
+																	end
+																end
+															end
+															if (v303 == 2) then
+																v172.CornerTR.From = Vector2.new(v237.X + (v249 / 2), v237.Y - (v248 / (2 + 0)));
+																v245 = 7 - 3;
+																break;
+															end
+														end
+														break;
+													end
+												end
+											end
+											if (v245 == (33 - 23)) then
+												v172.HealthBarOutline.Visible = true;
+												v172.HealthBar.From = Vector2.new(v256, v237.Y + (v248 / 2));
+												v172.HealthBar.To = Vector2.new(v256, (v237.Y + (v248 / (515 - (203 + 310)))) - v255);
+												v172.HealthBar.Color = v172.Health.Color;
+												v172.HealthBar.Visible = true;
+												break;
+											end
+											if (v245 == (1995 - (1238 + 755))) then
+												local FlatIdent_4D11E = 0;
+												while true do
+													if (FlatIdent_4D11E == 0) then
+														v172.Box.Visible = true;
+														v172.BoxOutline.Size = Vector2.new(v249, v248);
+														FlatIdent_4D11E = 1;
+													end
+													if (FlatIdent_4D11E == 2) then
+														v252 = math.min(v249, v248) / (7 - 3);
+														v245 = 3;
+														break;
+													end
+													if (FlatIdent_4D11E == 1) then
+														v172.BoxOutline.Position = Vector2.new(v237.X - (v249 / (1 + 1)), v237.Y - (v248 / (1536 - (709 + 825))));
+														v172.BoxOutline.Visible = true;
+														FlatIdent_4D11E = 2;
+													end
+												end
+											end
+											if (v245 == (1 - 0)) then
+												local FlatIdent_7C57C = 0;
+												while true do
+													if (FlatIdent_7C57C == 0) then
+														v251 = (v250 and Color3.fromRGB(864 - (196 + 668), 1006 - 751, 207 - 107)) or Color3.fromRGB(1088 - (171 + 662), 143 - (4 + 89), 175 - 125);
+														if v250 then
+															local FlatIdent_9851B = 0;
+															local v322;
+															local v323;
+															while true do
+																if (FlatIdent_9851B == 0) then
+																	v322 = 0 + 0;
+																	v323 = nil;
+																	FlatIdent_9851B = 1;
+																end
+																if (FlatIdent_9851B == 1) then
+																	while true do
+																		if (v322 == (0 - 0)) then
+																			v323 = (math.abs(math.sin(tick() * 3)) * (0.3 + 0)) + (1486.7 - (35 + 1451));
+																			v251 = Color3.fromRGB(0, (1708 - (28 + 1425)) * v323, 100);
+																			break;
+																		end
+																	end
+																	break;
+																end
+															end
+														end
+														FlatIdent_7C57C = 1;
+													end
+													if (FlatIdent_7C57C == 1) then
+														v172.Box.Size = Vector2.new(v249, v248);
+														v172.Box.Position = Vector2.new(v237.X - (v249 / (1995 - (941 + 1052))), v237.Y - (v248 / (2 + 0)));
+														FlatIdent_7C57C = 2;
+													end
+													if (FlatIdent_7C57C == 2) then
+														v172.Box.Color = v251;
+														v245 = 2;
+														break;
+													end
+												end
+											end
+											if (9 == v245) then
+												local FlatIdent_559FF = 0;
+												while true do
+													if (FlatIdent_559FF == 1) then
+														v256 = (v237.X - (v249 / (1516 - (822 + 692)))) - 7;
+														v172.HealthBarOutline.From = Vector2.new(v256, v237.Y - (v248 / (2 - 0)));
+														FlatIdent_559FF = 2;
+													end
+													if (FlatIdent_559FF == 2) then
+														v172.HealthBarOutline.To = Vector2.new(v256, v237.Y + (v248 / (1 + 1)));
+														v245 = 307 - (45 + 252);
+														break;
+													end
+													if (FlatIdent_559FF == 0) then
+														v172.Health.Visible = true;
+														v255 = v248 * (v193.Health / v193.MaxHealth);
+														FlatIdent_559FF = 1;
+													end
+												end
+											end
+											if (v245 == (5 + 0)) then
+												local FlatIdent_340E5 = 0;
+												local v320;
+												while true do
+													if (FlatIdent_340E5 == 0) then
+														v320 = 0;
+														while true do
+															if (v320 == (0 + 0)) then
+																local FlatIdent_129E6 = 0;
+																while true do
+																	if (0 == FlatIdent_129E6) then
+																		v172.CornerBL.Color = v251;
+																		v172.CornerBL.Visible = true;
+																		FlatIdent_129E6 = 1;
+																	end
+																	if (FlatIdent_129E6 == 1) then
+																		v320 = 2 - 1;
+																		break;
+																	end
+																end
+															end
+															if (v320 == (434 - (114 + 319))) then
+																local FlatIdent_91A09 = 0;
+																while true do
+																	if (FlatIdent_91A09 == 1) then
+																		v320 = 3 - 1;
+																		break;
+																	end
+																	if (FlatIdent_91A09 == 0) then
+																		v172.CornerBR.From = Vector2.new(v237.X + (v249 / (2 - 0)), v237.Y + (v248 / (2 - 0)));
+																		v172.CornerBR.To = Vector2.new((v237.X + (v249 / (2 + 0))) - v252, v237.Y + (v248 / (2 - 0)));
+																		FlatIdent_91A09 = 1;
+																	end
+																end
+															end
+															if (v320 == (1965 - (556 + 1407))) then
+																v172.CornerBR.Color = v251;
+																v245 = 1212 - (741 + 465);
+																break;
+															end
+														end
+														break;
+													end
+												end
+											end
+										end
+										break;
+									end
+								end
+							else
+								local FlatIdent_3416F = 0;
+								while true do
+									if (3 == FlatIdent_3416F) then
+										v172.Health.Visible = false;
+										v172.HealthBar.Visible = false;
+										v172.HealthBarOutline.Visible = false;
+										break;
+									end
+									if (FlatIdent_3416F == 0) then
+										v172.Box.Visible = false;
+										v172.BoxOutline.Visible = false;
+										v172.CornerTL.Visible = false;
+										FlatIdent_3416F = 1;
+									end
+									if (FlatIdent_3416F == 1) then
+										v172.CornerTR.Visible = false;
+										v172.CornerBL.Visible = false;
+										v172.CornerBR.Visible = false;
+										FlatIdent_3416F = 2;
+									end
+									if (2 == FlatIdent_3416F) then
+										v172.Tracer.Visible = false;
+										v172.Name.Visible = false;
+										v172.Distance.Visible = false;
+										FlatIdent_3416F = 3;
+									end
+								end
+							end
+						else
+							local FlatIdent_97B67 = 0;
+							local v239;
+							while true do
+								if (FlatIdent_97B67 == 0) then
+									v239 = 465 - (170 + 295);
+									while true do
+										if (v239 == (0 + 0)) then
+											v172.Box.Visible = false;
+											v172.BoxOutline.Visible = false;
+											v172.CornerTL.Visible = false;
+											v172.CornerTR.Visible = false;
+											v239 = 1 + 0;
+										end
+										if (v239 == (2 - 1)) then
+											local FlatIdent_4D69A = 0;
+											while true do
+												if (FlatIdent_4D69A == 1) then
+													v172.Tracer.Visible = false;
+													v172.Name.Visible = false;
+													FlatIdent_4D69A = 2;
+												end
+												if (FlatIdent_4D69A == 2) then
+													v239 = 2 + 0;
+													break;
+												end
+												if (0 == FlatIdent_4D69A) then
+													v172.CornerBL.Visible = false;
+													v172.CornerBR.Visible = false;
+													FlatIdent_4D69A = 1;
+												end
+											end
+										end
+										if (2 == v239) then
+											v172.Distance.Visible = false;
+											v172.Health.Visible = false;
+											v172.HealthBar.Visible = false;
+											v172.HealthBarOutline.Visible = false;
+											break;
+										end
+									end
+									break;
+								end
+							end
+						end
+						break;
+					end
+					if (v191 == 0) then
+						local v232 = 0 + 0;
+						while true do
+							if (v232 == 0) then
+								v192 = v171.Character;
+								v193 = v192:FindFirstChildOfClass(v7("\149\204\45\77\179\214\41\72", "\44\221\185\64"));
+								v232 = 1 + 0;
+							end
+							if (v232 == 1) then
+								v191 = 1;
+								break;
+							end
+						end
+					end
+				end
+			end
+		end);
+	end
+end
+local function v43(v139)
+	if v139 then
+		for v187, v188 in pairs(workspace:GetDescendants()) do
+			if (v188:IsA(v7("\154\35\109\27\20\250\253\172", "\143\216\66\30\126\68\155")) and not v188:IsDescendantOf(v14.Character)) then
+				local FlatIdent_1077D = 0;
+				local v201;
+				local v202;
+				while true do
+					if (0 == FlatIdent_1077D) then
+						v201 = 1230 - (957 + 273);
+						v202 = nil;
+						FlatIdent_1077D = 1;
+					end
+					if (1 == FlatIdent_1077D) then
+						while true do
+							if (v201 == (0 + 0)) then
+								v202 = 0;
+								while true do
+									if (v202 == 0) then
+										v32[v188] = v188.Transparency;
+										v188.Transparency = 0.7 + 0;
+										break;
+									end
+								end
+								break;
+							end
+						end
+						break;
+					end
+				end
+			end
+		end
+	else
+		local v182 = 0 - 0;
+		while true do
+			if (v182 == (0 - 0)) then
+				for v217, v218 in pairs(v32) do
+					if (v217 and v217.Parent) then
+						v217.Transparency = v218;
+					end
+				end
+				v32 = {};
+				break;
+			end
+		end
+	end
+end
+local function v44(v140)
+	if v140 then
+		v34 = v12.JumpRequest:Connect(function()
+			if (v14.Character and v14.Character:FindFirstChildOfClass(v7("\130\221\0\202\203\172\222\229", "\129\202\168\109\171\165\195\183"))) then
+				v14.Character:FindFirstChildOfClass(v7("\10\77\58\217\208\27\239\38", "\134\66\56\87\184\190\116")):ChangeState(Enum.HumanoidStateType.Jumping);
+			end
+		end);
+	elseif v34 then
+		local FlatIdent_2E3CE = 0;
+		local v196;
+		while true do
+			if (FlatIdent_2E3CE == 0) then
+				v196 = 0 - 0;
+				while true do
+					if (v196 == (0 - 0)) then
+						v34:Disconnect();
+						v34 = nil;
+						break;
+					end
+				end
+				break;
+			end
+		end
+	end
+end
+v9:CreateHomeTab({[v7("\15\36\25\171\22\249\53\48\56\20\17\190\26\254\53\58\46\34", "\85\92\81\105\219\121\139\65")]={v7("\206\170\94\68\108\204\248\243\104", "\191\157\211\48\37\28"),v7("\244\13\250\16", "\90\191\127\148\124"),v7("\94\139\59\15\109\148", "\119\24\231\78"),v7("\177\46\183\67\204\84\92\181\44\183\79", "\113\226\77\197\42\188\32"),v7("\31\26\241\182\46\4\251\187", "\213\90\118\148"),v7("\104\33\184\87\95\90", "\45\59\78\212\54"),v7("\39\87\149\142", "\144\112\54\227\235\230\78\205"),v7("\151\45\3\232\209", "\59\211\72\111\156\176"),v7("\118\130\237\34", "\77\46\231\131")},[v7("\158\93\165\67\181\70\178\105\180\66\191\84\191", "\32\218\52\214")]=nil,[v7("\103\20\62\166", "\58\46\119\81\200\145\208\37")]=1});
+local v45 = v9:CreateTab({[v7("\5\141\61\169", "\86\75\236\80\204\201\221")]=v7("\81\78\122\135\255\159", "\235\18\33\23\229\158"),[v7("\121\185\206\181", "\219\48\218\161")]=v7("\227\97\111\118\221\70\248\225\117", "\128\132\17\28\41\187\47"),[v7("\40\63\7\61\88\50\61\19\40\94\4", "\61\97\82\102\90")]=v7("\129\47\191\78\213\94\31\5", "\105\204\78\203\43\167\55\126"),[v7("\150\162\44\9\39\13\211\93\160", "\49\197\202\67\126\115\100\167")]=true});
+local v46 = v9:CreateTab({[v7("\25\90\210\44", "\62\87\59\191\73\224\54")]=v7("\209\11\233\220\230\14\233", "\169\135\98\154"),[v7("\226\116\43\90", "\168\171\23\68\52\157\83")]=v7("\226\120\230\164\39\36\139\253\101\236", "\231\148\17\149\205\69\77"),[v7("\169\170\198\252\82\204\143\178\213\248\82", "\159\224\199\167\155\55")]=v7("\218\242\40\215\229\250\61\222", "\178\151\147\92"),[v7("\191\245\67\37\38\69\110\128\248", "\26\236\157\44\82\114\44")]=true});
+local v47 = v9:CreateTab({[v7("\4\47\216\94", "\59\74\78\181")]=v7("\8\216\73\89", "\211\69\177\58\58"),[v7("\158\230\118\251", "\171\215\133\25\149\137")]=v7("\236\199\32\255\208\56\243\80\232\210", "\34\129\168\82\154\143\80\156"),[v7("\172\191\50\12\77\125\134\144\160\48\14", "\233\229\210\83\107\40\46")]=v7("\236\67\38\211\23\200\67\62", "\101\161\34\82\182"),[v7("\219\5\86\233\239\235\150\34\237", "\78\136\109\57\158\187\130\226")]=true});
+local v48 = v9:CreateTab({[v7("\16\62\244\244", "\145\94\95\153")]=v7("\206\200\0\193\71\185\250\222", "\215\157\173\116\181\46"),[v7("\28\183\132\252", "\186\85\212\235\146")]=v7("\209\132\2\234\48\224\95\209", "\56\162\225\118\158\89\142"),[v7("\117\8\193\168\39\235\83\16\210\172\39", "\184\60\101\160\207\66")]=v7("\28\131\104\185\35\139\125\176", "\220\81\226\28"),[v7("\32\221\141\236\222\206\7\217\135", "\167\115\181\226\155\138")]=true});
+local v49 = v45:CreateSection(v7("\195\43\234\80\116\114\205", "\166\130\66\135\60\27\17"));
+local v50 = v45:CreateToggle({[v7("\106\75\195\112", "\80\36\42\174\21")]=v7("\107\30\54\120\66\21\119\91\71\29\59\117\77\27", "\26\46\112\87"),[v7("\154\54\185\102\186\177\81\130\184\47\190\113", "\212\217\67\203\20\223\223\37")]=false,[v7("\156\129\169\213", "\178\218\237\200")]=v7("\151\188\235\220\185\182\237\228\185\178\225\220\179", "\176\214\213\134"),[v7("\215\172\186\216\170\87\90\255", "\57\148\205\214\180\200\54")]=function(v141)
+	local v142 = 0 - 0;
+	local v143;
+	while true do
+		if (0 == v142) then
+			v143 = 0;
+			while true do
+				if (v143 == (0 + 0)) then
+					v15 = v141;
+					v35();
+					break;
+				end
+			end
+			break;
+		end
+	end
+end});
+local v51 = v45:CreateToggle({[v7("\60\252\56\49", "\22\114\157\85\84")]=v7("\247\198\28\203\73\254\232\229\194\30", "\200\164\171\115\164\61\150"),[v7("\157\225\17\87\134\176\224\53\68\143\171\241", "\227\222\148\99\37")]=false,[v7("\21\94\83\241", "\153\83\50\50\150")]=v7("\110\123\124\19\103\163\108\84\123\71\19\116\172\65\88", "\45\61\22\19\124\19\203"),[v7("\226\19\1\249\0\113\186\202", "\217\161\114\109\149\98\16")]=function(v144)
+	v17 = v144;
+end});
+local v52 = v45:CreateSlider({[v7("\60\33\53\121", "\20\114\64\88\28\220")]=v7("\2\12\221\187\236\216\179\52\18\193", "\221\81\97\178\212\152\176"),[v7("\255\230\19\252\31", "\122\173\135\125\155")]={0.1,(2 - 1)},[v7("\173\207\3\171\58\60\205\138\213", "\168\228\161\96\217\95\81")]=0.05,[v7("\248\196\60\78\42\89\207\231\47\80\58\82", "\55\187\177\78\60\79")]=(1212.4 - (1090 + 122)),[v7("\11\194\94\236", "\224\77\174\63\139\38\175")]=v7("\183\76\87\33\144\73\86\43\151\82\107\34\141\69\93\60", "\78\228\33\56"),[v7("\237\127\190\15\135\207\125\185", "\229\174\30\210\99")]=function(v145)
+	v22 = v145;
+end});
+local v53 = v45:CreateToggle({[v7("\53\236\139\84", "\89\123\141\230\49\141\93")]=v7("\196\112\250\0\80\105\251\116\245\7", "\42\147\17\150\108\112"),[v7("\44\179\63\109\226\230\27\144\44\115\242\237", "\136\111\198\77\31\135")]=true,[v7("\36\5\166\81", "\201\98\105\199\54\221\132\119")]=v7("\142\13\143\45\33\61\169\186\7\183\46\5\50\160\188", "\204\217\108\227\65\98\85"),[v7("\125\194\249\233\46\193\93\200", "\160\62\163\149\133\76")]=function(v146)
+	v23 = v146;
+end});
+local v54 = v45:CreateDropdown({[v7("\248\161\0\42", "\163\182\192\109\79")]=v7("\0\39\18\199\240\32\102\34\207\241\45\102\48\193\231\32", "\149\84\70\96\160"),[v7("\23\22\25\228\55\8\30", "\141\88\102\109")]={v7("\155\86\203\116", "\161\211\51\170\16\122\93\53"),v7("\206\190\162\45\233\154\189\58\232\161", "\72\155\206\210"),v7("\106\117\67\11\33\114\117\70\29\60", "\83\38\26\52\110"),v7("\112\2\42\71\86\24\46\66\106\24\40\82\104\22\53\82", "\38\56\119\71")},[v7("\208\250\74\196\32\88\231\192\72\194\44\89\253", "\54\147\143\56\182\69")]={v7("\254\132\254\77", "\191\182\225\159\41")},[v7("\6\7\36\65\130\151\206\46\61\56\65\130\136\204\56", "\162\75\114\72\53\235\231")]=false,[v7("\170\48\69\229", "\98\236\92\36\130\51")]=v7("\133\16\1\138\68\186\161\20\182\22\28\190\74\191\187", "\80\196\121\108\218\37\200\213"),[v7("\35\114\14\115\73\15\137\11", "\234\96\19\98\31\43\110")]=function(v147)
+	if (type(v147) == v7("\18\30\80\203\169", "\235\102\127\50\167\204\18")) then
+		v18 = v147[2 - 1];
+	else
+		v18 = v147;
+	end
+end});
+local v55 = v45:CreateSection(v7("\118\142\195\99\103\39\66\162\249\38", "\78\48\193\149\67\36"));
+local v56 = v45:CreateToggle({[v7("\30\31\141\29", "\33\80\126\224\120")]=v7("\201\166\2\198\80\233\232\37\235\106", "\60\140\200\99\164"),[v7("\164\225\22\52\167\137\224\50\39\174\146\241", "\194\231\148\100\70")]=false,[v7("\96\64\192\164", "\168\38\44\161\195\150")]=v7("\166\211\180\66\63\239\177\26\133", "\118\224\156\226\22\80\136\214"),[v7("\97\239\85\140\64\239\90\139", "\224\34\142\57")]=function(v148)
+	local FlatIdent_29A75 = 0;
+	local v149;
+	while true do
+		if (FlatIdent_29A75 == 0) then
+			v149 = 0;
+			while true do
+				if ((0 - 0) == v149) then
+					v19 = v148;
+					v35();
+					break;
+				end
+			end
+			break;
+		end
+	end
+end});
+local v57 = v45:CreateSlider({[v7("\240\166\200\216", "\110\190\199\165\189\19\145\61")]=v7("\252\196\65\168\184\206\192\238", "\167\186\139\23\136\235"),[v7("\40\180\134\10\31", "\109\122\213\232")]={50,500},[v7("\199\249\161\34\235\250\167\62\250", "\80\142\151\194")]=(20 - 10),[v7("\32\211\101\94\6\200\99\122\2\202\98\73", "\44\99\166\23")]=(289 - 189),[v7("\90\251\40\49", "\196\28\151\73\86\83")]=v7("\213\44\31\35\142\81\28\115\225", "\22\147\99\73\112\226\56\120"),[v7("\155\116\238\249\143\185\118\233", "\237\216\21\130\149")]=function(v150)
+	local FlatIdent_8E3FD = 0;
+	local v151;
+	while true do
+		if (FlatIdent_8E3FD == 0) then
+			v151 = 0 + 0;
+			while true do
+				if (v151 == 0) then
+					v20 = v150;
+					if v21 then
+						v21.Radius = v150;
+					end
+					break;
+				end
+			end
+			break;
+		end
+	end
+end});
+local v58 = v45:CreateColorPicker({[v7("\172\79\82\90", "\62\226\46\63\63\208\169")]=v7("\195\54\99\195\60\2\35\81\247", "\62\133\121\53\227\127\109\79"),[v7("\51\27\62\250\196", "\194\112\116\82\149\182\206")]=Color3.fromRGB(255, 33 + 222, 1950 - (556 + 1139)),[v7("\31\164\77\31", "\110\89\200\44\120\160\130")]=v7("\141\236\125\101\76\70\52\95", "\45\203\163\43\38\35\42\91"),[v7("\241\132\208\47\133\168\87\217", "\52\178\229\188\67\231\201")]=function(v152)
+	if v21 then
+		v21.Color = v152;
+	end
+end});
+local v59 = v45:CreateSection(v7("\0\72\93\6\248\72\99\105\114\89\8\242\82\55\104", "\67\65\33\48\100\151\60"));
+local v60 = v45:CreateToggle({[v7("\241\230\163\221", "\147\191\135\206\184")]=v7("\161\38\167\195\212\86\242\165\33\171\195\215\71", "\210\228\72\198\161\184\51"),[v7("\21\92\225\2\118\192\34\127\242\28\102\203", "\174\86\41\147\112\19")]=false,[v7("\125\12\140\12", "\203\59\96\237\107\69\111\113")]=v7("\5\31\161\227\62\228\227\43\17\171\237\52", "\183\68\118\204\129\81\144"),[v7("\45\172\124\232\9\131\13\166", "\226\110\205\16\132\107")]=function(v153)
+	v16 = v153;
+end});
+local v61 = v46:CreateSection(v7("\206\240\208", "\33\139\163\128\185"));
+local v62 = v46:CreateToggle({[v7("\121\89\9\219", "\190\55\56\100")]=v7("\115\161\61\28\31\230\179\115\156\12", "\147\54\207\92\126\115\131"),[v7("\46\36\39\111\8\112\25\7\52\113\24\123", "\30\109\81\85\29\109")]=false,[v7("\217\125\85\177", "\156\159\17\52\214\86\190")]=v7("\139\220\141\136\161\232\186\176\171", "\220\206\143\221"),[v7("\165\124\33\27\218\205\209\141", "\178\230\29\77\119\184\172")]=function(v154)
+	local v155 = 0;
+	while true do
+		if ((15 - (6 + 9)) == v155) then
+			v25 = v154;
+			if v154 then
+				local FlatIdent_5EF9 = 0;
+				local v204;
+				local v205;
+				while true do
+					if (FlatIdent_5EF9 == 1) then
+						while true do
+							if (v204 == (0 + 0)) then
+								v205 = 169 - (28 + 141);
+								while true do
+									if ((0 + 0) == v205) then
+										for v286, v287 in pairs(v10:GetPlayers()) do
+											if (v287 ~= v14) then
+												v40(v287);
+											end
+										end
+										v11:BindToRenderStep(v7("\192\174\14\26\99\253\208\141\58", "\152\149\222\106\123\23"), Enum.RenderPriority.Camera.Value + (1 - 0), v42);
+										break;
+									end
+								end
+								break;
+							end
+						end
+						break;
+					end
+					if (FlatIdent_5EF9 == 0) then
+						v204 = 0 + 0;
+						v205 = nil;
+						FlatIdent_5EF9 = 1;
+					end
+				end
+			else
+				v11:UnbindFromRenderStep(v7("\232\54\242\66\161\216\3\197\115", "\213\189\70\150\35"));
+				for v219, v220 in pairs(v30) do
+					v41(v219);
+				end
+			end
+			break;
+		end
+	end
+end});
+local v63 = v46:CreateColorPicker({[v7("\97\84\121\13", "\104\47\53\20")]=v7("\134\127\177\92\159\0\175\67\147", "\111\195\44\225\124\220"),[v7("\251\73\12\124\185", "\203\184\38\96\19\203")]=Color3.fromRGB(255, 0 + 0, 0),[v7("\31\127\120\70", "\174\89\19\25\33")]=v7("\10\33\98\109\248\139\4\61", "\107\79\114\50\46\151\231"),[v7("\26\167\185\37\136\56\180\203", "\160\89\198\213\73\234\89\215")]=function(v156)
+	for v173, v174 in pairs(v30) do
+		local v175 = 0;
+		while true do
+			if (v175 == (1317 - (486 + 831))) then
+				v174.Box.Color = v156;
+				v174.Tracer.Color = v156;
+				break;
+			end
+		end
+	end
+end});
+local v64 = v46:CreateSection(v7("\112\60\134\255\220", "\165\40\17\212\158"));
+local v65 = v46:CreateToggle({[v7("\203\216\5\54", "\70\133\185\104\83")]=v7("\33\75\69\40\197\1\5\124\103\251\5\92", "\169\100\37\36\74"),[v7("\35\146\176\66\5\137\182\102\1\139\183\85", "\48\96\231\194")]=false,[v7("\238\86\15\42", "\227\168\58\110\77\121\184\207")]=v7("\67\14\190\89\133\212\118\162\119\57", "\197\27\92\223\32\209\187\17"),[v7("\32\94\207\247\1\94\192\240", "\155\99\63\163")]=function(v157)
+	local FlatIdent_511F5 = 0;
+	local v158;
+	while true do
+		if (0 == FlatIdent_511F5) then
+			v158 = 0 - 0;
+			while true do
+				if (v158 == (0 - 0)) then
+					v31 = v157;
+					v43(v157);
+					break;
+				end
+			end
+			break;
+		end
+	end
+end});
+local v66 = v46:CreateSlider({[v7("\172\208\172\136", "\228\226\177\193\237\217")]=v7("\12\253\17\231\45\240\23\244\53\190\48\246\53\162\38\232\55\169", "\134\84\208\67"),[v7("\33\173\136\91\22", "\60\115\204\230")]={0,(1 + 0)},[v7("\206\52\232\98\226\55\238\126\243", "\16\135\90\139")]=(0.1 - 0),[v7("\119\97\20\33\75\90\108\98\117\10\38\75", "\24\52\20\102\83\46\52")]=0.7,[v7("\226\35\32\35", "\111\164\79\65\68")]=v7("\254\235\130\199\26\248\199\215\144\206\47\248\195\215\128\199", "\138\166\185\227\190\78"),[v7("\232\117\201\59\80\34\26\192", "\121\171\20\165\87\50\67")]=function(v159)
+	if v31 then
+		for v189, v190 in pairs(v32) do
+			if (v189 and v189.Parent) then
+				v189.Transparency = v159;
+			end
+		end
+	end
+end});
+local v67 = v47:CreateSection(v7("\235\55\175\51\180\7\200\44", "\98\166\88\217\86\217"));
+local v68 = v47:CreateToggle({[v7("\216\247\116\4", "\188\150\150\25\97\230")]=v7("\243\135\89\11\2\228\206\140\31\40\25\224\202", "\141\186\233\63\98\108"),[v7("\210\255\62\164\32\255\254\26\183\41\228\239", "\69\145\138\76\214")]=false,[v7("\86\195\136\142", "\118\16\175\233\233\223")]=v7("\162\138\51\178\224\130\105\142\174\32\182\254", "\29\235\228\85\219\142\235"),[v7("\30\213\182\209\117\79\36\89", "\50\93\180\218\189\23\46\71")]=function(v160)
+	local FlatIdent_16F8D = 0;
+	while true do
+		if (FlatIdent_16F8D == 0) then
+			v33 = v160;
+			v44(v160);
+			break;
+		end
+	end
+end});
+local v69 = v48:CreateSection(v7("\247\170\93\67", "\40\190\196\59\44\36\188"));
+v48:CreateParagraph({[v7("\8\76\200\184\255", "\109\92\37\188\212\154\29")]=v7("\62\234\182\204\113\110\22\238\167\198\113\70\68\201\168\202\50\81", "\58\100\143\196\163\81"),[v7("\57\77\45\183\58\71\241", "\110\122\34\67\195\95\41\133")]="A clean and simple FPS script for Flick.\n\nFeatures:\n- Aimlock with FOV\n- Silent Aimbot\n- ESP (Boxes, Names, Health, Distance)\n- X-Ray Vision\n\nCreated by Xenure"});
+local v70 = v48:CreateSection(v7("\86\190\85\94\196\122\189\72", "\182\21\209\59\42"));
+v48:CreateKeybind({[v7("\153\86\200\24", "\222\215\55\165\125\65")]=v7("\24\222\193\29\254\196\173\127\5", "\42\76\177\166\122\146\161\141"),[v7("\134\159\23\220\124\120\177\161\0\215\123\127\171\142", "\22\197\234\101\174\25")]=v7("\31\61\162\212\98\156\223\143\43\32", "\230\77\84\197\188\22\207\183"),[v7("\209\27\202\248\184\174\217\59\237\17\212\253\143\181", "\85\153\116\166\156\236\193\144")]=false,[v7("\130\236\76\180", "\96\196\128\45\211\132")]=v7("\0\164\80\90\203\173\189\214\49", "\184\85\237\27\63\178\207\212"),[v7("\43\88\5\83\10\88\10\84", "\63\104\57\105")]=function(v161)
+end});
+v48:CreateButton({[v7("\37\134\169\65", "\36\107\231\196")]=v7("\121\176\177\147\79\186\187\199\122\128\139", "\231\61\213\194"),[v7("\42\172\49\127\11\172\62\120", "\19\105\205\93")]=function()
+	v8:Destroy();
+end});
+v11.RenderStepped:Connect(function()
+	local FlatIdent_2EAC6 = 0;
+	local v162;
+	local v163;
+	while true do
+		if (FlatIdent_2EAC6 == 0) then
+			v162 = 1263 - (668 + 595);
+			v163 = nil;
+			FlatIdent_2EAC6 = 1;
+		end
+		if (FlatIdent_2EAC6 == 1) then
+			while true do
+				if (v162 == 0) then
+					v163 = 0;
+					while true do
+						if (v163 == 1) then
+							v39();
+							break;
+						end
+						if (0 == v163) then
+							v36();
+							v38();
+							v163 = 1 + 0;
+						end
+					end
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+v10.PlayerAdded:Connect(function(v164)
+	if (v25 and (v164 ~= v14)) then
+		v40(v164);
+	end
+end);
+v10.PlayerRemoving:Connect(function(v165)
+	v41(v165);
+end);
+v8:Notification({[v7("\157\1\202\141\58", "\95\201\104\190\225")]=v7("\149\206\211\193\239\255\211\207\172\206\129\226\160\202\197\203\171", "\174\207\171\161"),[v7("\206\241\3\231\253\217\249", "\183\141\158\109\147\152")]=v7("\31\10\244\5\60\29\166\0\35\8\226\9\40\73\245\25\47\10\227\31\63\15\243\0\32\16\167", "\108\76\105\134"),[v7("\194\198\190\239", "\174\139\165\209\129")]=v7("\160\187\231\194\205\60\115\113\177\176\238\196", "\24\195\211\130\161\166\99\16"),[v7("\111\14\232\43\86\37\73\22\251\47\86", "\118\38\99\137\76\51")]=v7("\208\39\17\23\27\41\252\42", "\64\157\70\101\114\105")});
